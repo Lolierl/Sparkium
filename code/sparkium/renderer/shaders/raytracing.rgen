@@ -106,18 +106,65 @@ Material GetMaterial(HitRecord hit_record) {
   return material;
 }
 
-vec3 SampleRay(vec3 origin, vec3 direction) {
-  TraceRay(origin, direction);
+//vec3 SampleRay(vec3 origin, vec3 direction) {
+//  TraceRay(origin, direction);
+//
+//  if (ray_payload.t == -1.0) {
+//    return EnvmapSample(direction);
+//  }
+//  hit_record = ComposeHitRecord(ray_payload, origin, direction);
+//  material = GetMaterial(hit_record);
+//  return material.base_color * -dot(hit_record.shading_normal, direction);
+//}
+vec3 UniformSampleHemisphere(vec3 normal) 
+{
+    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
 
-  if (ray_payload.t == -1.0) {
-    return EnvmapSample(direction);
-  }
+    float theta = 0.5 * PI * u1; 
+    float phi = 2.0 * PI * u2;     
 
-  hit_record = ComposeHitRecord(ray_payload, origin, direction);
-  material = GetMaterial(hit_record);
-  return material.base_color * -dot(hit_record.shading_normal, direction);
+    vec3 local_dir = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+
+    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
+    vec3 bitangent = cross(normal, tangent);
+
+    return local_dir.x * tangent + local_dir.y * normal + local_dir.z * bitangent;
 }
+vec3 SampleRay(vec3 origin, vec3 direction)
+{
+  vec3 radiance = vec3(0.0); 
+  vec3 throughput = vec3(1.0); 
+  vec3 hit_point, normal, base_color;
+  float t;
+    
+  for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
+  {
+    TraceRay(origin, direction); 
+    if (ray_payload.t == -1.0) {
+      radiance += throughput * EnvmapSample(direction);
+      break; 
+    }
+    hit_record = ComposeHitRecord(ray_payload, origin, direction);
+    material = GetMaterial(hit_record);
+    float r = distance(origin, hit_record.position); 
+    if(material.emission_strength > 0.0)
+    {
+      radiance += throughput * material.emission * material.emission_strength / r / r; 
+      break; 
+    }
+    vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
 
+    float cos_theta = dot(new_direction, hit_record.shading_normal);
+    vec3 brdf = material.base_color / 2 / PI; 
+
+    throughput *= brdf * cos_theta;
+
+    origin = hit_record.position + new_direction * 1e-4;
+    direction = new_direction; 
+  }
+  return radiance;
+}
 void main() {
   for (uint i = 0; i < scene_settings.num_sample; i++) {
     uint s = scene_settings.accumulated_sample + i;

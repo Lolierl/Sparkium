@@ -147,20 +147,36 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     }
     hit_record = ComposeHitRecord(ray_payload, origin, direction);
     material = GetMaterial(hit_record);
-    float r = distance(origin, hit_record.position); 
+    //float r = 0.01 * distance(origin, hit_record.position); 
     if(material.emission_strength > 0.0)
     {
-      radiance += throughput * material.emission * material.emission_strength / (4* PI * r * r); 
+      radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
+      break;
     }
-    vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
+    if(material.type == MATERIAL_TYPE_LAMBERTIAN)
+    {
+      vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
 
-    float cos_theta = dot(new_direction, hit_record.shading_normal);
-    vec3 brdf = material.base_color * 2 * PI; 
+      float cos_theta = dot(new_direction, hit_record.shading_normal);
+      vec3 brdf = material.base_color; 
 
-    throughput *= brdf * cos_theta;
+      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
 
-    origin = hit_record.position + new_direction * 1e-4;
-    direction = new_direction; 
+      origin = hit_record.position + new_direction * 1e-4;
+      direction = new_direction; 
+    }
+    else if(material.type == MATERIAL_TYPE_SPECULAR)
+    {
+      vec3 new_direction = -dot(hit_record.shading_normal, direction) * hit_record.shading_normal * 2 + direction; 
+      
+      float cos_theta = dot(new_direction, hit_record.shading_normal);
+      vec3 brdf = material.base_color; 
+
+      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+
+      origin = hit_record.position + new_direction * 1e-4;
+      direction = new_direction; 
+    }
   }
   return radiance;
 }

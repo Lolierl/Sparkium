@@ -131,6 +131,65 @@ vec3 UniformSampleHemisphere(vec3 normal)
 
     return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
 }
+vec3 UniformSampleTriangle(vec3 v0, vec3 v1, vec3 v2) 
+{
+    float u1 = RandomFloat();
+    float u2 = RandomFloat();
+    float sqrt_u1 = sqrt(u1);
+    float b0 = 1.0 - sqrt_u1;
+    float b1 = sqrt_u1 * (1.0 - u2);
+    float b2 = sqrt_u1 * u2;
+    return b0 * v0 + b1 * v1 + b2 * v2;
+}
+float TriangleArea(vec3 v0, vec3 v1, vec3 v2) 
+{
+    vec3 e1 = v1 - v0; 
+    vec3 e2 = v2 - v0; 
+    return 0.5 * length(cross(e1, e2)); 
+}
+struct SamplePoint
+{
+  vec3 position; 
+  int mesh_id, primitive_id; 
+  float pdf; 
+}; 
+SamplePoint SampleDirectLighting(vec3 origin, vec3 direction) 
+{
+  float u = RandomFloat();
+  int selected_light = 0;
+
+  int low = 0;
+  int high = scene_settings.num_entity - 1;
+  while (low <= high) {
+      int mid = (low + high) / 2;
+      if (u < metadatas[mid].emission_cdf) {
+          selected_light = mid;
+          high = mid - 1; // 在左半部分继续查找
+      } else {
+          low = mid + 1; // 在右半部分继续查找
+      }
+  }
+  int mesh_id = metadatas[selected_light].mesh_id; 
+  u = RandomFloat();
+  int primitive_id = 0; 
+  for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
+    if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
+  int v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
+  int v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
+  int v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
+  Vertex v0 = GetVertex(mesh_id, v0_id); 
+  Vertex v1 = GetVertex(mesh_id, v1_id); 
+  Vertex v2 = GetVertex(mesh_id, v2_id); 
+  vec3 v = UniformSampleTriangle(v0, v1, v2); 
+  SamplePoint ret; 
+  ret.position = v; 
+  ret.mesh_id = mesh_id; 
+  ret.primitive_id = primitive_id; 
+  float entity_pdf = metadatas[selected_light].emission_cdf - ((selected_light == 0) ? 0 : metadatas[selected_light - 1].emission_cdf); 
+  float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
+  ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
+  return ret; 
+}
 vec3 SampleRay(vec3 origin, vec3 direction)
 {
   vec3 radiance = vec3(0.0); 
@@ -156,7 +215,8 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     if(material.type == MATERIAL_TYPE_LAMBERTIAN)
     {
       vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
-
+      //TODO: replace uniformsample with SampleDirectLighting
+      //SamplePoint samplepoint = SampleDirectLighting(origin, direction); 
       float cos_theta = dot(new_direction, hit_record.shading_normal);
       vec3 brdf = material.base_color; 
 
@@ -180,6 +240,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   }
   return radiance;
 }
+
 void main() {
   for (uint i = 0; i < scene_settings.num_sample; i++) {
     uint s = scene_settings.accumulated_sample + i;

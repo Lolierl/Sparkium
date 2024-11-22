@@ -147,44 +147,54 @@ float TriangleArea(vec3 v0, vec3 v1, vec3 v2)
     vec3 e2 = v2 - v0; 
     return 0.5 * length(cross(e1, e2)); 
 }
+vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
+    vec3 e1 = v1 - v0; 
+    vec3 e2 = v2 - v0; 
+    return normalize(cross(e1, e2)); 
+}
 struct SamplePoint
 {
   vec3 position; 
-  int mesh_id, primitive_id; 
+  uint mesh_id, primitive_id; 
   float pdf; 
 }; 
-SamplePoint SampleDirectLighting(vec3 origin, vec3 direction) 
+SamplePoint SampleDirectLighting() 
 {
   float u = RandomFloat();
   int selected_light = 0;
 
-  int low = 0;
-  int high = scene_settings.num_entity - 1;
+  /*int low = 0;
+  int high = int(scene_settings.num_entity - 1);
   while (low <= high) {
       int mid = (low + high) / 2;
       if (u < metadatas[mid].emission_cdf) {
           selected_light = mid;
-          high = mid - 1; // 在左半部分继续查找
+          high = mid - 1; 
       } else {
-          low = mid + 1; // 在右半部分继续查找
+          low = mid + 1; 
       }
   }
-  int mesh_id = metadatas[selected_light].mesh_id; 
+  uint mesh_id = metadatas[selected_light].mesh_id; */
+  uint entity_id = 0; 
+  for(; entity_id < scene_settings.num_entity; entity_id++)
+    if(metadatas[entity_id].emission_cdf > u)break; 
+  uint mesh_id = metadatas[entity_id].mesh_id; 
   u = RandomFloat();
   int primitive_id = 0; 
   for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
     if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
-  int v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
-  int v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
-  int v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
+  uint v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
+  uint v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
+  uint v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
   Vertex v0 = GetVertex(mesh_id, v0_id); 
   Vertex v1 = GetVertex(mesh_id, v1_id); 
   Vertex v2 = GetVertex(mesh_id, v2_id); 
-  vec3 v = UniformSampleTriangle(v0, v1, v2); 
+  vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position); 
   SamplePoint ret; 
   ret.position = v; 
   ret.mesh_id = mesh_id; 
   ret.primitive_id = primitive_id; 
+
   float entity_pdf = metadatas[selected_light].emission_cdf - ((selected_light == 0) ? 0 : metadatas[selected_light - 1].emission_cdf); 
   float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
   ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
@@ -196,34 +206,59 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   vec3 throughput = vec3(1.0); 
   vec3 hit_point, normal, base_color;
   float t;
-    
+  TraceRay(origin, direction);  
+  if (ray_payload.t == -1.0) {
+    radiance += throughput * EnvmapSample(direction);
+    return radiance; 
+  }     
+  hit_record = ComposeHitRecord(ray_payload, origin, direction);
+  material = GetMaterial(hit_record);
+  if(material.emission_strength > 1e-4)
+  {
+    radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
+    return radiance; 
+  }
+  normal = hit_record.shading_normal; 
+  float cos_theta = dot(-direction, normal);
+  vec3 brdf = material.base_color; 
+
+  throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+  origin = hit_record.position + normal * 1e-4;
+
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
-    TraceRay(origin, direction); 
-    if (ray_payload.t == -1.0) {
-      radiance += throughput * EnvmapSample(direction);
-      break; 
-    }
-    hit_record = ComposeHitRecord(ray_payload, origin, direction);
-    material = GetMaterial(hit_record);
-    //float r = 0.01 * distance(origin, hit_record.position); 
-    if(material.emission_strength > 0.0)
-    {
-      radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
-      break;
-    }
     if(material.type == MATERIAL_TYPE_LAMBERTIAN)
     {
-      vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
-      //TODO: replace uniformsample with SampleDirectLighting
-      //SamplePoint samplepoint = SampleDirectLighting(origin, direction); 
-      float cos_theta = dot(new_direction, hit_record.shading_normal);
-      vec3 brdf = material.base_color; 
-
-      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
-
-      origin = hit_record.position + new_direction * 1e-4;
-      direction = new_direction; 
+      SamplePoint samplepoint = SampleDirectLighting(); 
+      float r = distance(origin, samplepoint.position); 
+      vec3 new_direction = normalize(samplepoint.position - origin); 
+      if(ShadowRay(origin, new_direction, r) > 1e-3)
+      {
+        TraceRay(origin, new_direction);  
+        hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
+        material = GetMaterial(hit_record);
+        radiance += throughput * material.emission * material.emission_strength / (2*PI) * dot(normal, new_direction) * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / samplepoint.pdf;  
+      }
+      
+      new_direction = UniformSampleHemisphere(normal); 
+      TraceRay(origin, new_direction);  
+      if (ray_payload.t == -1.0) {
+          radiance += throughput * EnvmapSample(new_direction);
+          break; 
+      }     
+      hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
+      material = GetMaterial(hit_record);
+      if(material.emission_strength < 1e-4)
+      {
+        float cos_theta = dot(new_direction, normal);
+        vec3 brdf = material.base_color; 
+        throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+        origin = hit_record.position + new_direction * 1e-4;
+        direction = new_direction; 
+        normal = hit_record.shading_normal; 
+      }
+      else
+        break; 
     }
     else if(material.type == MATERIAL_TYPE_SPECULAR)
     {

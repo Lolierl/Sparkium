@@ -197,7 +197,10 @@ void LoadCornellBox(Scene *scene) {
   int short_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "ShortBoxMesh");
   Material short_box_material;
-  short_box_material.base_color = {0.8f, 0.8f, 0.8f};
+  //short_box_material.type = MATERIAL_TYPE_LAMBERTIAN; 
+  //short_box_material.base_color = {0.8f, 0.8f, 0.8f};
+  short_box_material.type = MATERIAL_TYPE_RETRACTIVE; 
+  short_box_material.base_color = {1.0f, 1.0f, 1.0f};
   int short_box_id = scene->CreateEntity();
   scene->SetEntityMesh(short_box_id, short_box_mesh_id);
   scene->SetEntityMaterial(short_box_id, short_box_material);
@@ -286,6 +289,7 @@ void LoadCornellBox(Scene *scene) {
   int tall_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "TallBoxMesh");
   Material tall_box_material;
+  tall_box_material.type = MATERIAL_TYPE_SPECULAR;
   tall_box_material.base_color = {0.8f, 0.8f, 0.8f};
   int tall_box_id = scene->CreateEntity();
   scene->SetEntityMesh(tall_box_id, tall_box_mesh_id);

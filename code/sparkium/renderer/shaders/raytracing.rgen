@@ -161,20 +161,6 @@ struct SamplePoint
 SamplePoint SampleDirectLighting() 
 {
   float u = RandomFloat();
-  int selected_light = 0;
-
-  /*int low = 0;
-  int high = int(scene_settings.num_entity - 1);
-  while (low <= high) {
-      int mid = (low + high) / 2;
-      if (u < metadatas[mid].emission_cdf) {
-          selected_light = mid;
-          high = mid - 1; 
-      } else {
-          low = mid + 1; 
-      }
-  }
-  uint mesh_id = metadatas[selected_light].mesh_id; */
   uint entity_id = 0; 
   for(; entity_id < scene_settings.num_entity; entity_id++)
     if(metadatas[entity_id].emission_cdf > u)break; 
@@ -194,8 +180,10 @@ SamplePoint SampleDirectLighting()
   ret.position = v; 
   ret.mesh_id = mesh_id; 
   ret.primitive_id = primitive_id; 
-
-  float entity_pdf = metadatas[selected_light].emission_cdf - ((selected_light == 0) ? 0 : metadatas[selected_light - 1].emission_cdf); 
+  int pre_entity_id = 0;
+  for(; pre_entity_id < entity_id; pre_entity_id++)
+    if(metadatas[pre_entity_id].emission_cdf > 0.0)break; 
+  float entity_pdf = metadatas[entity_id].emission_cdf - ((pre_entity_id == entity_id) ? 0 : metadatas[pre_entity_id].emission_cdf); 
   float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
   ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
   return ret; 
@@ -242,29 +230,33 @@ vec3 SampleRay(vec3 origin, vec3 direction)
 
   float inside = 0.0; 
   TraceRay(origin, direction);  
+  /*No hit Case*/
   if (ray_payload.t == -1.0) {
     radiance += throughput * EnvmapSample(direction);
     return radiance; 
-  }     
+  }
+
+  /*Direct Illumumination*/     
   hit_record = ComposeHitRecord(ray_payload, origin, direction);
   material = GetMaterial(hit_record);
   if(material.emission_strength > 1e-4)
   {
-    radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
+    radiance += throughput * material.emission * material.emission_strength; 
     return radiance; 
   }
   normal = hit_record.shading_normal; 
   float cos_theta = dot(-direction, normal);
   vec3 brdf = material.base_color; 
 
-  throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+  throughput *= brdf * cos_theta;
   origin = hit_record.position + normal * 1e-4;
+  float total_area = CalculateTotalLightArea();
 
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
     if(material.type == MATERIAL_TYPE_LAMBERTIAN)
     {
-      
+      /*1.LightSource*/
       SamplePoint samplepoint = SampleDirectLighting(); 
       float r = distance(origin, samplepoint.position); 
       vec3 new_direction = normalize(samplepoint.position - origin); 
@@ -273,15 +265,18 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         TraceRay(origin, new_direction);  
         hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
         material = GetMaterial(hit_record);
-        radiance += throughput * material.emission * material.emission_strength  * dot(normal, new_direction) * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / samplepoint.pdf;  
+        radiance += throughput * material.emission * material.emission_strength * dot(normal, new_direction) * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / samplepoint.pdf;  
       }
       
+      /*2.Lambert*/
       new_direction = UniformSampleHemisphere(normal); 
-      TraceRay(origin, new_direction);  
+      TraceRay(origin, new_direction); 
+      /*2.1 No hit*/ 
       if (ray_payload.t == -1.0) {
           radiance += throughput * EnvmapSample(new_direction);
           break; 
-      }     
+      } 
+      /*2.2 Accumulation*/    
       hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
       material = GetMaterial(hit_record);
       if(material.emission_strength < 1e-4)

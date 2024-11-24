@@ -188,13 +188,47 @@ SamplePoint SampleDirectLighting()
   ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
   return ret; 
 }
+vec3 ReflectionDirection(vec3 normal, vec3 direction)
+{
+  if(dot(normal, direction) > 0)normal = -normal; 
+  return -dot(normal, direction) * normal * 2 + direction; 
+}
+vec3 RefractionDirection(vec3 normal, vec3 direction, float ior, float inside) 
+{
+    direction = normalize(direction);
+    normal = normalize(normal);
+    float eta = (inside > 1e-3) ? (1.0 / ior) : ior;
+    float cosThetaI = dot(normal, direction);
 
+    if (cosThetaI < 0) {
+        cosThetaI = -cosThetaI; 
+    } else {
+        normal = -normal; 
+    }
+    float k = 1.0 - eta * eta * (1.0 - cosThetaI * cosThetaI);
+    if (k < 0.0) {
+        return vec3(0.0, 0.0, 0.0);
+    }
+    return eta * direction + (eta * cosThetaI - sqrt(k)) * normal;
+}
+float SchlickApproximation(float cosTheta, float ior1, float ior2) 
+{
+    float R0 = pow((ior1 - ior2) / (ior1 + ior2), 2.0);
+    float eta = ior1 / ior2;
+    float sin2ThetaT = eta * eta * (1.0 - cosTheta * cosTheta);
+    if (sin2ThetaT > 1.0) {
+        return 1.0;
+    }
+
+    return R0 + (1.0 - R0) * pow(1.0 - cosTheta, 5.0);
+}
 vec3 SampleRay(vec3 origin, vec3 direction)
 {
   vec3 radiance = vec3(0.0); 
   vec3 throughput = vec3(1.0); 
   vec3 hit_point, normal, base_color;
-  float t;
+
+  float inside = 0.0; 
   TraceRay(origin, direction);  
   /*No hit Case*/
   if (ray_payload.t == -1.0) {
@@ -259,20 +293,141 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     }
     else if(material.type == MATERIAL_TYPE_SPECULAR)
     {
-      vec3 new_direction = -dot(hit_record.shading_normal, direction) * hit_record.shading_normal * 2 + direction; 
-      
+      vec3 new_direction = ReflectionDirection(normal, direction); 
+      TraceRay(origin, new_direction);  
+      if (ray_payload.t == -1.0) {
+          radiance += throughput * EnvmapSample(new_direction);
+          break; 
+      }  
+
+      hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
+      material = GetMaterial(hit_record);
+
+      if(material.emission_strength > 1e-4)
+      {
+        radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, new_direction)); 
+        return radiance; 
+      }
+      float cos_theta = -dot(new_direction, hit_record.shading_normal);
+      vec3 brdf = material.base_color; 
+      throughput *= brdf * cos_theta; 
+
+      origin = hit_record.position + new_direction * 1e-4;
+      direction = new_direction; 
+      normal = hit_record.shading_normal; 
+    }
+    else if(material.type == MATERIAL_TYPE_RETRACTIVE)
+    {
+      vec3 reflection_direction = ReflectionDirection(normal, direction); 
+      float cos_theta = -dot(direction, normal);
+      float ior1 = ((inside < 1e-3) ? 1.0 : material.ior); 
+      float ior2 = ((inside > 1e-3) ? 1.0 : material.ior); 
+      vec3 retraction_direction = RefractionDirection(normal, direction, material.ior, inside); 
+      float ratio = SchlickApproximation(cos_theta, ior1, ior2); 
+      if(RandomFloat() <= ratio) //Reflection
+      {
+        throughput /= ratio; 
+        vec3 new_direction = reflection_direction; 
+        TraceRay(origin, new_direction);  
+        if (ray_payload.t == -1.0) {
+            radiance += throughput * EnvmapSample(new_direction);
+            break; 
+        }  
+
+        hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
+        material = GetMaterial(hit_record);
+
+        if(material.emission_strength > 1e-4)
+        {
+          radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, new_direction)); 
+          return radiance; 
+        }
+        float cos_theta = -dot(new_direction, hit_record.shading_normal);
+        vec3 brdf = material.base_color; 
+        throughput *= brdf * cos_theta; 
+
+        origin = hit_record.position + new_direction * 1e-4;
+        direction = new_direction; 
+        normal = hit_record.shading_normal; 
+      }
+      else 
+      {
+        throughput /= (1 - ratio); 
+        vec3 new_direction = retraction_direction; 
+        TraceRay(origin, new_direction);  
+        if (ray_payload.t == -1.0) {
+            radiance += throughput * EnvmapSample(new_direction);
+            break; 
+        }  
+
+        hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
+        material = GetMaterial(hit_record);
+
+        if(material.emission_strength > 1e-4)
+        {
+          radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, new_direction)); 
+          return radiance; 
+        }
+        float cos_theta = -dot(new_direction, hit_record.shading_normal);
+        vec3 brdf = material.base_color; 
+        throughput *= brdf * cos_theta; 
+
+        origin = hit_record.position + new_direction * 1e-4;
+        direction = new_direction; 
+        normal = hit_record.shading_normal; 
+        inside = ((inside < 1e-3) ? 1.0 : 0.0); 
+      }
+    }
+  }
+  return radiance;
+}
+/*
+vec3 SampleRay(vec3 origin, vec3 direction)
+{
+  vec3 radiance = vec3(0.0); 
+  vec3 throughput = vec3(1.0); 
+  vec3 hit_point, normal, base_color;
+  float t;
+    
+  for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
+  {
+    TraceRay(origin, direction); 
+    if (ray_payload.t == -1.0) {
+      radiance += throughput * EnvmapSample(direction);
+      break; 
+    }
+    hit_record = ComposeHitRecord(ray_payload, origin, direction);
+    material = GetMaterial(hit_record);
+    //float r = 0.01 * distance(origin, hit_record.position); 
+    if(material.emission_strength > 0.0)
+    {
+      radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
+      break;
+    }
+    if(material.type == MATERIAL_TYPE_LAMBERTIAN)
+    {
+      vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
       float cos_theta = dot(new_direction, hit_record.shading_normal);
       vec3 brdf = material.base_color; 
-
       throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
 
       origin = hit_record.position + new_direction * 1e-4;
       direction = new_direction; 
     }
+    else if(material.type == MATERIAL_TYPE_SPECULAR)
+    {
+      vec3 new_direction = ReflectionDirection(hit_record.shading_normal, direction); 
+      float cos_theta = dot(new_direction, hit_record.shading_normal);
+      vec3 brdf = material.base_color; 
+      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+
+      origin = hit_record.position + hit_record.shading_normal * 1e-4;
+      direction = new_direction; 
+    }
   }
   return radiance;
 }
-
+*/
 void main() {
   for (uint i = 0; i < scene_settings.num_sample; i++) {
     uint s = scene_settings.accumulated_sample + i;

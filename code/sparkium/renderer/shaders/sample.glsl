@@ -15,6 +15,29 @@ struct SamplePoint
   float pdf; 
 };
 
+vec3 UniformSampleTriangle(vec3 v0, vec3 v1, vec3 v2) 
+{
+    float u1 = RandomFloat();
+    float u2 = RandomFloat();
+    float sqrt_u1 = sqrt(u1);
+    float b0 = 1.0 - sqrt_u1;
+    float b1 = sqrt_u1 * (1.0 - u2);
+    float b2 = sqrt_u1 * u2;
+    return b0 * v0 + b1 * v1 + b2 * v2;
+}
+
+float TriangleArea(vec3 v0, vec3 v1, vec3 v2) 
+{
+    vec3 e1 = v1 - v0; 
+    vec3 e2 = v2 - v0; 
+    return 0.5 * length(cross(e1, e2)); 
+}
+vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
+    vec3 e1 = v1 - v0; 
+    vec3 e2 = v2 - v0; 
+    return normalize(cross(e1, e2)); 
+}
+
 /*Light Sample*/
 LightSamplePoint SampleDirectLighting() 
 {
@@ -81,28 +104,6 @@ vec3 UniformSampleHemisphere(vec3 normal)
     return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
 }
 
-vec3 UniformSampleTriangle(vec3 v0, vec3 v1, vec3 v2) 
-{
-    float u1 = RandomFloat();
-    float u2 = RandomFloat();
-    float sqrt_u1 = sqrt(u1);
-    float b0 = 1.0 - sqrt_u1;
-    float b1 = sqrt_u1 * (1.0 - u2);
-    float b2 = sqrt_u1 * u2;
-    return b0 * v0 + b1 * v1 + b2 * v2;
-}
-float TriangleArea(vec3 v0, vec3 v1, vec3 v2) 
-{
-    vec3 e1 = v1 - v0; 
-    vec3 e2 = v2 - v0; 
-    return 0.5 * length(cross(e1, e2)); 
-}
-vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
-    vec3 e1 = v1 - v0; 
-    vec3 e2 = v2 - v0; 
-    return normalize(cross(e1, e2)); 
-}
-
 /*Radiance SampleS*/
 SamplePoint CosineSampleHemisphere(vec3 normal)
 {
@@ -126,6 +127,22 @@ SamplePoint CosineSampleHemisphere(vec3 normal)
     ret.position = normalize(ret.position);
     ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
     return ret;
-};
+}
 
+vec3 GGXsampleMicroNormal(float alpha, vec3 N)
+{
+	vec2 rand = vec2(RandomFloat(), RandomFloat());
+	float xi_1 = rand.x;
+	float xi_2 = rand.y;
+
+	float theta = atan(alpha * sqrt(xi_1) / sqrt(1 - xi_1));
+	float phi = 2 * PI * xi_2;
+	vec3 NotN = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+	vec3 T = normalize(cross(NotN, N));	
+	vec3 B = cross(N, T);		
+
+	return T * (sin(theta) * cos(phi)) +
+		B * (sin(theta) * sin(phi)) +
+		N * cos(theta);
+}
 #endif

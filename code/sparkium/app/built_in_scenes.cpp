@@ -199,8 +199,9 @@ void LoadCornellBox(Scene *scene) {
   Material short_box_material;
   //short_box_material.type = MATERIAL_TYPE_LAMBERTIAN; 
   //short_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  short_box_material.type = MATERIAL_TYPE_LAMBERTIAN; 
+  short_box_material.type = MATERIAL_TYPE_ISOTROPIC_RETRACTIVE; 
   short_box_material.base_color = {1.0f, 1.0f, 1.0f};
+  short_box_material.alpha = 0.1; 
   int short_box_id = scene->CreateEntity();
   scene->SetEntityMesh(short_box_id, short_box_mesh_id);
   scene->SetEntityMaterial(short_box_id, short_box_material);

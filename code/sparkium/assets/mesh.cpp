@@ -346,6 +346,44 @@ int Mesh::LoadFromHeightMap(const Texture &height_map,
   return 0;
 }
 
+void Mesh::CreateSphere(const glm::vec3 &position, float radius, uint32_t num_segments, uint32_t num_rings) {
+  vertices_.clear();
+  indices_.clear();
+
+  for (uint32_t y = 0; y <= num_rings; ++y) {
+    for (uint32_t x = 0; x <= num_segments; ++x) {
+      float x_segment = static_cast<float>(x) / num_segments;
+      float y_segment = static_cast<float>(y) / num_rings;
+      float x_pos = radius * std::cos(x_segment * 2.0f * M_PI) * std::sin(y_segment * M_PI);
+      float y_pos = radius * std::cos(y_segment * M_PI);
+      float z_pos = radius * std::sin(x_segment * 2.0f * M_PI) * std::sin(y_segment * M_PI);
+
+      Vertex vertex;
+      vertex.position = glm::vec3(x_pos, y_pos, z_pos) + position;
+      vertex.normal = glm::normalize(vertex.position - position);
+      vertices_.push_back(vertex);
+    }
+  }
+
+  for (uint32_t y = 0; y < num_rings; ++y) {
+    for (uint32_t x = 0; x < num_segments; ++x) {
+      uint32_t first = (y * (num_segments + 1)) + x;
+      uint32_t second = first + num_segments + 1;
+
+      indices_.push_back(first);
+      indices_.push_back(second);
+      indices_.push_back(first + 1);
+
+      indices_.push_back(second);
+      indices_.push_back(second + 1);
+      indices_.push_back(first + 1);
+    }
+  }
+  CalculateNormals(vertices_, indices_);
+  BuildTangent();
+}
+
+
 void CalculateNormals(std::vector<Vertex> &vertices,
                       const std::vector<uint32_t> &indices) {
   std::vector<glm::vec3> normals(vertices.size(), glm::vec3{0.0f});

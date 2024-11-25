@@ -19,6 +19,8 @@ class Mesh {
                         float height_scale = 1.0f,
                         float height_offset = 0.0f);
 
+  void CreateSphere(const glm::vec3 &position, float radius = 1.0f, uint32_t num_segments = 16, uint32_t num_rings = 16);
+
   const std::vector<Vertex> &Vertices() const {
     return vertices_;
   }

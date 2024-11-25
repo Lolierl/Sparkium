@@ -106,16 +106,6 @@ Material GetMaterial(HitRecord hit_record) {
   return material;
 }
 
-//vec3 SampleRay(vec3 origin, vec3 direction) {
-//  TraceRay(origin, direction);
-//
-//  if (ray_payload.t == -1.0) {
-//    return EnvmapSample(direction);
-//  }
-//  hit_record = ComposeHitRecord(ray_payload, origin, direction);
-//  material = GetMaterial(hit_record);
-//  return material.base_color * -dot(hit_record.shading_normal, direction);
-//}
 vec3 UniformSampleHemisphere(vec3 normal) 
 {
     float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
@@ -152,13 +142,43 @@ vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
     vec3 e2 = v2 - v0; 
     return normalize(cross(e1, e2)); 
 }
-struct SamplePoint
+struct LightSamplePoint
 {
   vec3 position; 
   uint mesh_id, primitive_id; 
   float pdf; 
-}; 
-SamplePoint SampleDirectLighting() 
+};
+struct SamplePoint
+{
+  vec3 position;
+  float pdf; 
+};
+
+SamplePoint CosineSampleHemisphere(vec3 normal)
+{
+    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
+
+    float r = sqrt(u1);
+    float theta = 2.0 * PI * u2;
+
+    float x = r * cos(theta);
+    float y = r * sin(theta);
+    float z = sqrt(1.0 - u1);
+
+    vec3 local_dir = vec3(x, y, z);
+
+    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
+    vec3 bitangent = cross(normal, tangent);
+
+    SamplePoint ret;
+    ret.position = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
+    ret.position = normalize(ret.position);
+    ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
+    return ret;
+};
+
+LightSamplePoint SampleDirectLighting() 
 {
   float u = RandomFloat();
   uint entity_id = 0; 
@@ -176,7 +196,7 @@ SamplePoint SampleDirectLighting()
   Vertex v1 = GetVertex(mesh_id, v1_id); 
   Vertex v2 = GetVertex(mesh_id, v2_id); 
   vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position); 
-  SamplePoint ret; 
+  LightSamplePoint ret; 
   ret.position = v; 
   ret.mesh_id = mesh_id; 
   ret.primitive_id = primitive_id; 
@@ -248,32 +268,32 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   float cos_theta = dot(-direction, normal);
   vec3 brdf = material.base_color; 
 
-  throughput *= brdf * cos_theta;
+  throughput *= brdf * cos_theta / PI;
   origin = hit_record.position + normal * 1e-4;
-  float total_area = CalculateTotalLightArea();
 
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
     if(material.type == MATERIAL_TYPE_LAMBERTIAN)
     {
       /*1.LightSource*/
-      SamplePoint samplepoint = SampleDirectLighting(); 
-      float r = distance(origin, samplepoint.position); 
-      vec3 new_direction = normalize(samplepoint.position - origin); 
+      LightSamplePoint light_sample_point = SampleDirectLighting(); 
+      float r = distance(origin, light_sample_point.position); 
+      vec3 new_direction = normalize(light_sample_point.position - origin); 
       if(ShadowRay(origin, new_direction, r) > 1e-3)
       {
         TraceRay(origin, new_direction);  
         hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
         material = GetMaterial(hit_record);
-        radiance += throughput * material.emission * material.emission_strength * dot(normal, new_direction) * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / samplepoint.pdf;  
+        radiance += throughput * material.emission * material.emission_strength * dot(normal, new_direction) * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / light_sample_point.pdf;  
       }
       
       /*2.Lambert*/
-      new_direction = UniformSampleHemisphere(normal); 
+      SamplePoint samplepoint = CosineSampleHemisphere(normal); 
+      new_direction = samplepoint.position; 
       TraceRay(origin, new_direction); 
       /*2.1 No hit*/ 
       if (ray_payload.t == -1.0) {
-          radiance += throughput * EnvmapSample(new_direction);
+          radiance += throughput * EnvmapSample(new_direction) / samplepoint.pdf;
           break; 
       } 
       /*2.2 Accumulation*/    
@@ -283,7 +303,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       {
         float cos_theta = dot(new_direction, normal);
         vec3 brdf = material.base_color; 
-        throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
+        throughput *= brdf * cos_theta / PI;
         origin = hit_record.position + new_direction * 1e-4;
         direction = new_direction; 
         normal = hit_record.shading_normal; 

@@ -73,22 +73,8 @@ layout(location = 0) rayPayloadEXT RayPayload ray_payload;
 #include "hit_record.glsl"
 #include "shadow_ray.glsl"
 #include "trace_ray.glsl"
+#include "sample.glsl"
 
-vec4 SampleTextureLinear(uint texture_id, vec2 uv) {
-  return texture(sampler2D(sampled_textures[texture_id], samplers[0]), uv);
-}
-
-vec4 SampleTextureNearest(uint texture_id, vec2 uv) {
-  return texture(sampler2D(sampled_textures[texture_id], samplers[1]), uv);
-}
-
-vec3 EnvmapSample(vec3 direction) {
-  return texture(
-             sampler2D(sampled_textures[envmap_data.envmap_id], samplers[0]),
-             SampleEnvmapUV(direction))
-             .xyz *
-         envmap_data.scale;
-}
 
 Material GetMaterial(HitRecord hit_record) {
   Material material = materials[hit_record.entity_id];
@@ -106,108 +92,7 @@ Material GetMaterial(HitRecord hit_record) {
   return material;
 }
 
-vec3 UniformSampleHemisphere(vec3 normal) 
-{
-    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
-    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
 
-    float theta = 0.5 * PI * u1; 
-    float phi = 2.0 * PI * u2;     
-
-    vec3 local_dir = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-
-    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
-    vec3 bitangent = cross(normal, tangent);
-
-    return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
-}
-vec3 UniformSampleTriangle(vec3 v0, vec3 v1, vec3 v2) 
-{
-    float u1 = RandomFloat();
-    float u2 = RandomFloat();
-    float sqrt_u1 = sqrt(u1);
-    float b0 = 1.0 - sqrt_u1;
-    float b1 = sqrt_u1 * (1.0 - u2);
-    float b2 = sqrt_u1 * u2;
-    return b0 * v0 + b1 * v1 + b2 * v2;
-}
-float TriangleArea(vec3 v0, vec3 v1, vec3 v2) 
-{
-    vec3 e1 = v1 - v0; 
-    vec3 e2 = v2 - v0; 
-    return 0.5 * length(cross(e1, e2)); 
-}
-vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
-    vec3 e1 = v1 - v0; 
-    vec3 e2 = v2 - v0; 
-    return normalize(cross(e1, e2)); 
-}
-struct LightSamplePoint
-{
-  vec3 position; 
-  uint mesh_id, primitive_id; 
-  float pdf; 
-};
-struct SamplePoint
-{
-  vec3 position;
-  float pdf; 
-};
-
-SamplePoint CosineSampleHemisphere(vec3 normal)
-{
-    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
-    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
-
-    float r = sqrt(u1);
-    float theta = 2.0 * PI * u2;
-
-    float x = r * cos(theta);
-    float y = r * sin(theta);
-    float z = sqrt(1.0 - u1);
-
-    vec3 local_dir = vec3(x, y, z);
-
-    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
-    vec3 bitangent = cross(normal, tangent);
-
-    SamplePoint ret;
-    ret.position = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
-    ret.position = normalize(ret.position);
-    ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
-    return ret;
-};
-
-LightSamplePoint SampleDirectLighting() 
-{
-  float u = RandomFloat();
-  uint entity_id = 0; 
-  for(; entity_id < scene_settings.num_entity; entity_id++)
-    if(metadatas[entity_id].emission_cdf > u)break; 
-  uint mesh_id = metadatas[entity_id].mesh_id; 
-  u = RandomFloat();
-  int primitive_id = 0; 
-  for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
-    if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
-  uint v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
-  uint v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
-  uint v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
-  Vertex v0 = GetVertex(mesh_id, v0_id); 
-  Vertex v1 = GetVertex(mesh_id, v1_id); 
-  Vertex v2 = GetVertex(mesh_id, v2_id); 
-  vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position); 
-  LightSamplePoint ret; 
-  ret.position = v; 
-  ret.mesh_id = mesh_id; 
-  ret.primitive_id = primitive_id; 
-  int pre_entity_id = 0;
-  for(; pre_entity_id < entity_id; pre_entity_id++)
-    if(metadatas[pre_entity_id].emission_cdf > 0.0)break; 
-  float entity_pdf = metadatas[entity_id].emission_cdf - ((pre_entity_id == entity_id) ? 0 : metadatas[pre_entity_id].emission_cdf); 
-  float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
-  ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
-  return ret; 
-}
 vec3 ReflectionDirection(vec3 normal, vec3 direction)
 {
   if(dot(normal, direction) > 0)normal = -normal; 
@@ -401,53 +286,6 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   }
   return radiance;
 }
-/*
-vec3 SampleRay(vec3 origin, vec3 direction)
-{
-  vec3 radiance = vec3(0.0); 
-  vec3 throughput = vec3(1.0); 
-  vec3 hit_point, normal, base_color;
-  float t;
-    
-  for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
-  {
-    TraceRay(origin, direction); 
-    if (ray_payload.t == -1.0) {
-      radiance += throughput * EnvmapSample(direction);
-      break; 
-    }
-    hit_record = ComposeHitRecord(ray_payload, origin, direction);
-    material = GetMaterial(hit_record);
-    //float r = 0.01 * distance(origin, hit_record.position); 
-    if(material.emission_strength > 0.0)
-    {
-      radiance += throughput * material.emission * material.emission_strength * (-dot(hit_record.shading_normal, direction)); 
-      break;
-    }
-    if(material.type == MATERIAL_TYPE_LAMBERTIAN)
-    {
-      vec3 new_direction = UniformSampleHemisphere(hit_record.shading_normal);
-      float cos_theta = dot(new_direction, hit_record.shading_normal);
-      vec3 brdf = material.base_color; 
-      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
-
-      origin = hit_record.position + new_direction * 1e-4;
-      direction = new_direction; 
-    }
-    else if(material.type == MATERIAL_TYPE_SPECULAR)
-    {
-      vec3 new_direction = ReflectionDirection(hit_record.shading_normal, direction); 
-      float cos_theta = dot(new_direction, hit_record.shading_normal);
-      vec3 brdf = material.base_color; 
-      throughput *= brdf * cos_theta; // /(2*PI) * 2 * PI
-
-      origin = hit_record.position + hit_record.shading_normal * 1e-4;
-      direction = new_direction; 
-    }
-  }
-  return radiance;
-}
-*/
 void main() {
   for (uint i = 0; i < scene_settings.num_sample; i++) {
     uint s = scene_settings.accumulated_sample + i;

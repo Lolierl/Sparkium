@@ -24,6 +24,7 @@ void LoadCornellBox(Scene *scene) {
   };
 
 	// Create a pointlight
+  
 	Mesh light_sphere_mesh;
   glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
   light_sphere_mesh.CreateSphere(light_sphere_position, 1.0f, 16, 16);  // Small sphere with radius 10
@@ -32,7 +33,7 @@ void LoadCornellBox(Scene *scene) {
   Material light_sphere_material;
   light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
   light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
-  light_sphere_material.emission_strength = 10000.0f;  // Adjust the strength as needed
+  light_sphere_material.emission_strength = 1000.0f;  // Adjust the strength as needed
   light_sphere_material.type = MATERIAL_TYPE_POINTLIGHT;
   int light_sphere_id = scene->CreateEntity();
   scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
@@ -46,7 +47,8 @@ void LoadCornellBox(Scene *scene) {
 
 	Material sphere_material;
 	sphere_material.base_color = {0.8f, 0.8f, 0.8f};
-	sphere_material.type=MATERIAL_TYPE_LAMBERTIAN;
+	sphere_material.type=MATERIAL_TYPE_RETRACTIVE;
+  sphere_material.ior = 1.0; 
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);

@@ -9,7 +9,16 @@ vec3 ReflectionDirection(vec3 normal, vec3 direction)
   if(dot(normal, direction) > 0)normal = -normal; 
   return -dot(normal, direction) * normal * 2 + direction; 
 }
-
+vec3 RefractionDirection(vec3 normal, vec3 direction, float eta) 
+{    
+    vec3 wi = -normalize(direction); 
+    float cosTheta_i = dot(normal, wi); 
+    float sin2Theta_i = 1 - cosTheta_i * cosTheta_i; 
+    float sin2Theta_t = sin2Theta_i / (eta * eta);
+    float cosTheta_t = ((1 - sin2Theta_t) >= 0) ? sqrt(1 - sin2Theta_t) : 0; 
+    vec3 wt = -wi / eta + (cosTheta_i / eta - cosTheta_t) * normal;
+    return wt; 
+}
 float FresnelReflectionRate(vec3 in_direction, vec3 half_direction, float eta) {
   float reflect_rate;
   float c = abs(dot(in_direction, half_direction));
@@ -59,6 +68,30 @@ vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direct
   return (match > 0.9999) ? material.base_color : vec3(0.0);
 }
 
+vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal, float inside) {
+  // Calculate the perfect reflection direction
+
+  vec3 reflection_direction = ReflectionDirection(normal, in_direction);
+  float cos_theta = -dot(in_direction, normal);
+  float etap = (inside < 1e-3) ? material.ior : 1.0 / material.ior;
+  vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
+  float ratio = FresnelReflectionRate(in_direction, normal, etap); 
+  float match1 = max(dot(reflection_direction, out_direction), 0.0);
+  float match2 = max(dot(retraction_direction, out_direction), 0.0);
+  
+  if(match1 > 0.9999)
+  {
+    return material.base_color * ratio;
+  }
+  else if(match2 > 0.9999)
+  {
+    return material.base_color * (1 - ratio);
+  }
+  else
+  {
+    return vec3(0.0);
+  }
+}
 vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
   // Normalize input vectors
   vec3 N = normalize(normal_direction);
@@ -95,12 +128,15 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
   return specular;
 }
 
-vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return CalculateLambertianBRDF(material);
   }
   else if (material.type == MATERIAL_TYPE_SPECULAR) {
     return CalculateSpecularBRDF(material, in_direction, out_direction, normal_direction);
+  }
+  else if(material.type == MATERIAL_TYPE_RETRACTIVE) {
+    return CalculateRetractiveBSDF(material, in_direction, out_direction, normal_direction, inside);
   }
 }
 

@@ -238,9 +238,6 @@ int Mesh::LoadObjFile(const std::string &obj_file_path) {
         Vertex v0 = face_vertices[0];
         Vertex v1 = face_vertices[i];
         Vertex v2 = face_vertices[i + 1];
-        printf("%f %f %f\n", v0.position.x, v0.position.y, v0.position.z); 
-        printf("%f %f %f\n", v1.position.x, v1.position.y, v1.position.z);
-        printf("%f %f %f\n", v2.position.x, v2.position.y, v2.position.z);
         auto geometry_normal = glm::normalize(
             glm::cross(v1.position - v0.position, v2.position - v0.position));
         if (v0.normal == glm::vec3{0.0f, 0.0f, 0.0f}) {

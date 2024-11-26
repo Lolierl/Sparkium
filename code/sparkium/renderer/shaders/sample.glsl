@@ -48,13 +48,38 @@ vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
 }
 
 /*Light Sample*/
-LightSamplePoint SampleDirectLighting() 
+LightSamplePoint SampleDirectLighting(vec3 origin) 
 {
   float u = RandomFloat();
   uint entity_id = 0; 
   for(; entity_id < scene_settings.num_entity; entity_id++)
     if(metadatas[entity_id].emission_cdf > u)break; 
+
+  float entity_pdf = metadatas[entity_id].emission_cdf - ((entity_id == 0) ? 0 : metadatas[entity_id - 1].emission_cdf); 
+  Material material = materials[entity_id]; 
   uint mesh_id = metadatas[entity_id].mesh_id; 
+  /*if(material.type == MATERIAL_TYPE_POINTLIGHT)
+  {
+    LightSamplePoint ret; 
+    vec3 vertex = vec3(0, 0, 0); 
+    float dist = 1e9; 
+    for(int i = 0; i < mesh_metadatas[mesh_id].num_index; i++)
+    {
+      uint v_id = index_buffers[mesh_id].indices[i]; 
+      vec3 v = GetVertex(mesh_id, v_id).position;
+      if(distance(v, origin) < dist)
+      {
+        vertex = v; 
+        dist = distance(v, origin); 
+      }
+    }
+    ret.position = vertex; 
+    ret.mesh_id = mesh_id; 
+    ret.primitive_id = 0; 
+    ret.pdf = entity_pdf; 
+    return ret;
+  }*/
+  
   u = RandomFloat();
   int primitive_id = 0; 
   for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
@@ -70,10 +95,7 @@ LightSamplePoint SampleDirectLighting()
   ret.position = v; 
   ret.mesh_id = mesh_id; 
   ret.primitive_id = primitive_id; 
-  int pre_entity_id = 0;
-  for(; pre_entity_id < entity_id; pre_entity_id++)
-    if(metadatas[pre_entity_id].emission_cdf > 0.0)break; 
-  float entity_pdf = metadatas[entity_id].emission_cdf - ((pre_entity_id == entity_id) ? 0 : metadatas[pre_entity_id].emission_cdf); 
+
   float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
   ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
   return ret; 
@@ -184,14 +206,37 @@ SampleDirection SampleSpecularTransportDirection(vec3 in_direction, vec3 normal_
   ret.direction = ReflectionDirection(normal_direction, in_direction);
   return ret;
 }
+SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal, float inside) {
+  SampleDirection ret; 
+  ret.pdf = 1;
 
+  vec3 reflection_direction = ReflectionDirection(normal, in_direction); 
+  float cos_theta = -dot(in_direction, normal);
+  float etap = (inside < 1e-3) ? material.ior : 1.0 / material.ior;
+  vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
+  float ratio = FresnelReflectionRate(in_direction, normal, etap); 
+  if(RandomFloat() < ratio)
+  {
+    ret.pdf = ratio;
+    ret.direction = reflection_direction; 
+  }
+  else
+  {
+    ret.pdf = 1 - ratio;
+    ret.direction = retraction_direction;
+  }
+  return ret;
+}
 
-SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction) {
+SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return SampleLambertianTransportDirection(normal_direction);
   }
   else if (material.type == MATERIAL_TYPE_SPECULAR) {
     return SampleSpecularTransportDirection(in_direction, normal_direction);
+  }
+  else if (material.type == MATERIAL_TYPE_RETRACTIVE) {
+    return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside);
   }
 }
 

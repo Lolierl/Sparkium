@@ -5,11 +5,12 @@ namespace sparkium {
 
 // Definition of material type ids
 constexpr uint32_t MATERIAL_TYPE_LAMBERTIAN = 0;
-constexpr uint32_t MATERIAL_TYPE_SPECULAR = 1;
-constexpr uint32_t MATERIAL_TYPE_RETRACTIVE = 2;
-constexpr uint32_t MATERIAL_TYPE_ISOTROPIC = 3;
-constexpr uint32_t MATERIAL_TYPE_ISOTROPIC_RETRACTIVE = 4;
-constexpr uint32_t MATERIAL_TYPE_PRINCIPLED = 5;
+constexpr uint32_t MATERIAL_TYPE_POINTLIGHT = 1;
+constexpr uint32_t MATERIAL_TYPE_SPECULAR = 2;
+constexpr uint32_t MATERIAL_TYPE_RETRACTIVE = 3;
+constexpr uint32_t MATERIAL_TYPE_ISOTROPIC = 4;
+constexpr uint32_t MATERIAL_TYPE_ISOTROPIC_RETRACTIVE = 5;
+constexpr uint32_t MATERIAL_TYPE_PRINCIPLED = 6;
 
 // clang-format off
 struct Material {

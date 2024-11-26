@@ -75,7 +75,7 @@ vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_dire
   float cos_theta = -dot(in_direction, normal);
   float etap = (inside < 1e-3) ? material.ior : 1.0 / material.ior;
   vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
-  float ratio = FresnelReflectionRate(in_direction, normal, etap); 
+  float ratio = FresnelReflectionRate(in_direction, -normal, etap); 
   float match1 = max(dot(reflection_direction, out_direction), 0.0);
   float match2 = max(dot(retraction_direction, out_direction), 0.0);
   
@@ -85,7 +85,7 @@ vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_dire
   }
   else if(match2 > 0.9999)
   {
-    return material.base_color * (1 - ratio);
+    return material.base_color * (1 - ratio) / etap / etap;
   }
   else
   {

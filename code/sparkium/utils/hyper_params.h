@@ -4,5 +4,6 @@
 namespace sparkium {
 constexpr uint32_t kMaxTextures = 8192;
 constexpr uint32_t kMaxMeshes = 8192;
+constexpr uint32_t kMaxPointLights = 8192;
 constexpr uint32_t kMaxEntities = 8192;
 }  // namespace sparkium

@@ -270,7 +270,7 @@ void Application::DestroyImGuiManager() {
 
 void Application::CreateAssetManager() {
   asset_manager_ =
-      std::make_unique<AssetManager>(core_.get(), kMaxTextures, kMaxMeshes);
+      std::make_unique<AssetManager>(core_.get(), kMaxTextures, kMaxMeshes, kMaxPointLights);
 }
 
 void Application::DestroyAssetManager() {

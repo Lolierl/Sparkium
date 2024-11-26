@@ -5,8 +5,9 @@
 namespace sparkium {
 AssetManager::AssetManager(vulkan::Core *core,
                            uint32_t max_textures,
-                           uint32_t max_meshes)
-    : core_(core), max_textures_(max_textures), max_meshes_(max_meshes) {
+                           uint32_t max_meshes, 
+                           uint32_t max_point_lights)
+    : core_(core), max_textures_(max_textures), max_meshes_(max_meshes), max_point_lights_(max_point_lights) {
   CreateDescriptorObjects();
   CreateDefaultAssets();
 }
@@ -57,7 +58,9 @@ void AssetManager::CreateDescriptorObjects() {
        {4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, max_textures_,
         VK_SHADER_STAGE_RAYGEN_BIT_KHR, nullptr},
        {5, VK_DESCRIPTOR_TYPE_SAMPLER, 2, VK_SHADER_STAGE_RAYGEN_BIT_KHR,
-        nullptr}},
+        nullptr},
+       {6, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, max_point_lights_, 
+        VK_SHADER_STAGE_RAYGEN_BIT_KHR, nullptr}},
       &descriptor_set_layout_);
 
   vulkan::DescriptorPoolSize pool_size =
@@ -225,6 +228,11 @@ void AssetManager::ImGui() {
     for (const auto &[id, mesh] : meshes_) {
       ImGui::Text("%s", mesh.second->name_.c_str());
     }
+
+    ImGui::SeparatorText("Point Lights");
+    for (const auto &[id, point_light] : point_lights_) {
+      ImGui::Text("%s", point_light.second->name_.c_str());
+    }
   }
   ImGui::End();
 }
@@ -330,9 +338,31 @@ void AssetManager::UpdateTextureBindings(uint32_t frame_id) {
   descriptor_set->BindSampledImages(4, images);
 }
 
+void AssetManager::UpdatePointLightBindings(uint32_t frame_id) {
+  auto &descriptor_set = descriptor_sets_[frame_id];
+
+  std::vector<const vulkan::Buffer *> light_buffers;
+  for (auto point_light_id : GetPointLightIds()) {
+    auto point_light = GetPointLight(point_light_id);
+    light_buffers.push_back(point_light->light_buffer_->GetBuffer(frame_id));
+  }
+
+  uint32_t last_frame_bound_light_num = last_frame_bound_light_num_[frame_id];
+  last_frame_bound_light_num_[frame_id] = light_buffers.size();
+  if (last_frame_bound_light_num != light_buffers.size()) {
+    while (light_buffers.size() < last_frame_bound_light_num) {
+      auto point_light = GetPointLight(0);
+      light_buffers.push_back(point_light->light_buffer_->GetBuffer(frame_id));
+    }
+  }
+
+  descriptor_set->BindStorageBuffers(6, light_buffers);
+}
+
 void AssetManager::Update(uint32_t frame_id) {
   UpdateMeshDataBindings(frame_id);
   UpdateTextureBindings(frame_id);
+  UpdatePointLightBindings(frame_id);
 }
 
 bool AssetManager::ComboForTextureSelection(const char *label, uint32_t *id) {
@@ -389,6 +419,74 @@ void AssetManager::Clear() {
   last_frame_bound_mesh_num_ =
       std::vector<uint32_t>(core_->MaxFramesInFlight(), max_meshes_);
   CreateDefaultAssets();
+}
+
+int AssetManager::LoadPointLight(const PointLight &light, std::string name) {
+  PointLightAsset point_light_asset;
+  point_light_asset.light = light;
+  point_light_asset.name_ = std::move(name);
+
+  // Create a buffer for the point light data
+  if (core_->CreateStaticBuffer<PointLight>(
+          1,
+          VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+              VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+              VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+              VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+          &point_light_asset.light_buffer_) != VK_SUCCESS) {
+    return -1;
+  }
+
+  // Upload the point light data to the buffer
+  point_light_asset.light_buffer_->UploadContents(&point_light_asset.light, 1);
+
+  // Store the point light asset
+  uint32_t binding_point_light_id = point_lights_.size();
+  point_lights_[next_point_light_id_] = {
+      binding_point_light_id,
+      std::make_unique<PointLightAsset>(std::move(point_light_asset))};
+
+  return next_point_light_id_++;
+}
+
+bool AssetManager::ComboForPointLightSelection(const char *label, uint32_t *id) {
+  bool result = false;
+  std::vector<const char *> items;
+  std::vector<uint32_t> item_ids;
+  int current_selection = 0;
+  for (auto &[item_id, item] : point_lights_) {
+    items.push_back(item.second->name_.c_str());
+    item_ids.push_back(item_id);
+    if (item_id == *id) {
+      current_selection = items.size() - 1;
+    }
+  }
+  result = ImGui::Combo(label, &current_selection, items.data(),
+                        static_cast<int>(items.size()));
+  if (result) {
+    *id = item_ids[current_selection];
+  }
+  return result;
+}
+
+
+PointLightAsset *AssetManager::GetPointLight(uint32_t id) {
+  if (point_lights_.find(id) != point_lights_.end()) {
+    return point_lights_[id].second.get();
+  }
+  return point_lights_[0].second.get();
+}
+
+void AssetManager::DestroyPointLight(uint32_t id) {
+  point_lights_.erase(id);
+}
+
+std::set<uint32_t> AssetManager::GetPointLightIds() {
+  std::set<uint32_t> ids;
+  for (const auto &pair : point_lights_) {
+    ids.insert(pair.first);
+  }
+  return ids;
 }
 
 }  // namespace sparkium

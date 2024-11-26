@@ -22,8 +22,14 @@ void LoadCornellBox(Scene *scene) {
     vertex.tex_coord = tex_coord;
     return vertex;
   };
+// Create a pointlight
+sparkium::PointLight point_light;
+point_light.position = glm::vec3(10.0f, 10.0f, 10.0f);
+point_light.color = glm::vec3(1.0f, 1.0f, 1.0f);
+point_light.intensity = 1.0f;
+int point_light_id = asset_manager->LoadPointLight(point_light, "PointLight");
 
-  // Create a sphere
+// Create a sphere
 Mesh sphere_mesh;
 glm::vec3 sphere_position = glm::vec3(243.0f, 248.7f, 227.0f);  // Position of the sphere
 sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);

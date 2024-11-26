@@ -36,15 +36,24 @@ int sphere_id = scene->CreateEntity();
 scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 scene->SetEntityMaterial(sphere_id, sphere_material);
 
+Mesh bunny_mesh;
+bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
+bunny_mesh.scale(100.0f);
+bunny_mesh.translate(glm::vec3(100.0f, 100.0f, 100.0f));
+
+  int bunny_mesh_id =
+      asset_manager->LoadMesh(bunny_mesh, "BunnyMesh"); 
+
+  Material bunny_material;
+  bunny_material.base_color = {0.8f, 0.8f, 0.8f};
+  bunny_material.type=MATERIAL_TYPE_SPECULAR;
+  int bunny_id = scene->CreateEntity();
+  scene->SetEntityMesh(bunny_id, bunny_mesh_id);
+  scene->SetEntityMaterial(bunny_id, bunny_material);
 
   std::vector<Vertex> vertices;
   std::vector<uint32_t> indices = {0, 1, 3, 1, 2, 3};
 
-  Texture terrain_texture;
-  terrain_texture.LoadFromFile(
-      FindAssetsFile("texture/terrain/terrain-texture3.bmp"),
-      LDRColorSpace::UNORM);
-  
   // light
   // <vertex position="343.0 548.7 227.0" tex_coord="0 0"/>
   // <vertex position="343.0 548.7 332.0" tex_coord="1 0"/>
@@ -82,15 +91,20 @@ scene->SetEntityMaterial(sphere_id, sphere_material);
   scene->SetEntityMesh(floor_id, floor_mesh_id);
   scene->SetEntityMaterial(floor_id, floor_material);
 
+  Texture terrain_texture;
+  terrain_texture.LoadFromFile(
+      FindAssetsFile("texture/terrain/dog.jpg"),
+      LDRColorSpace::UNORM);
+
   Texture terrain_detail_texture;
   terrain_detail_texture.LoadFromFile(
-      FindAssetsFile("texture/terrain/detail.bmp"), LDRColorSpace::UNORM);
+      FindAssetsFile("texture/terrain/dog.jpg"), LDRColorSpace::UNORM);
   auto terrain_texture_id =
       asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
+
   auto terrain_detail_texture_id = asset_manager->LoadTexture(
       terrain_detail_texture, "TerrainDetailTexture");
-  scene->SetEntityAlbedoTexture(floor_id, terrain_texture_id);
-  scene->SetEntityAlbedoDetailTexture(floor_id, terrain_detail_texture_id);
+
 
   // ceiling
   // <vertex position="556.0 548.8 0.0  " tex_coord="0 0"/>
@@ -127,7 +141,8 @@ scene->SetEntityMaterial(sphere_id, sphere_material);
   int back_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
   scene->SetEntityMaterial(back_wall_id, back_wall_material);
-
+  scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+  scene->SetEntityAlbedoDetailTexture(back_wall_id, terrain_detail_texture_id);
   // right_wall
   // <vertex position="0.0   0.0 559.2 " tex_coord="0 0"/>
   // <vertex position = "0.0   0.0   0.0" tex_coord = "1 0" />

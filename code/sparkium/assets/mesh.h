@@ -28,7 +28,21 @@ class Mesh {
   const std::vector<uint32_t> &Indices() const {
     return indices_;
   }
-
+  void scale(float scale = 1.0f) {
+    float distance = 0.0f;
+    for (auto &vertex : vertices_) {
+      distance += glm::length(vertex.position);
+    }
+    distance /= vertices_.size();
+    for (auto &vertex : vertices_) {
+      vertex.position *= (scale / distance);
+    }
+  }
+  void translate(const glm::vec3 &translation = glm::vec3{0.0f}) {
+    for (auto &vertex : vertices_) {
+      vertex.position += translation;
+    }
+  }
  private:
   void MergeVertices();
 

@@ -1,0 +1,107 @@
+#ifndef BXDF_GLSL
+#define BXDF_GLSL
+
+#include "constants.glsl"
+#include "material.glsl"
+
+vec3 ReflectionDirection(vec3 normal, vec3 direction)
+{
+  if(dot(normal, direction) > 0)normal = -normal; 
+  return -dot(normal, direction) * normal * 2 + direction; 
+}
+
+float FresnelReflectionRate(vec3 in_direction, vec3 half_direction, float eta) {
+  float reflect_rate;
+  float c = abs(dot(in_direction, half_direction));
+  float gsquare = c*c - 1 + eta*eta;
+  if (gsquare > 0) {
+    float g = sqrt(gsquare);
+    reflect_rate = 0.5 * (g-c) * (g-c) / (g+c) / (g+c) * (1 + (c*g + c*c -1) * (c*g + c*c - 1) / (c*g - c*c + 1) / (c*g - c*c + 1));
+  } else {
+    reflect_rate = 1;
+  }
+
+  return reflect_rate;
+}
+
+float Shadow_term(vec3 in_direction, vec3 out_direction, vec3 normal_direction, vec3 half_direction, float alpha) {
+  float cos_theta_in = dot(-in_direction, normal_direction);
+  float cos_theta_on = dot(out_direction, normal_direction);
+  float cos_theta_im = dot(-in_direction, half_direction);
+  float cos_theta_om = dot(out_direction, half_direction);
+  float g1;
+  if (cos_theta_im * cos_theta_in > 0)
+    g1 = 2 / (1+sqrt(1 + alpha*alpha * (1/cos_theta_in/cos_theta_in - 1)));
+  else 
+    g1 = 0;
+
+  float g2;
+  if (cos_theta_om * cos_theta_on > 0)
+    g2 = 2 / (1+sqrt(1 + alpha*alpha * (1/cos_theta_on/cos_theta_on - 1)));
+  else 
+    g2 = 0;
+  float shadow = g1*g2;
+  return shadow;
+}
+
+vec3 CalculateLambertianBRDF(Material material) {
+  return material.base_color * INV_PI;
+}
+
+vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+  // Calculate the perfect reflection direction
+  vec3 truth =  ReflectionDirection(normal_direction, in_direction);
+  
+  // Check if the view direction matches the reflection direction
+  float match = max(dot(truth, out_direction), 0.0);
+
+  // For perfect specular, we only reflect in the perfect mirror direction
+  return (match > 0.9999) ? material.base_color : vec3(0.0);
+}
+
+vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+  // Normalize input vectors
+  vec3 N = normalize(normal_direction);
+  vec3 V = normalize(out_direction);
+  vec3 L = normalize(in_direction);
+    
+  // Calculate the half vector
+  vec3 H = normalize(V + L);
+    
+    // Calculate the Fresnel term using Schlick's approximation
+  vec3 F0 = material.base_color;
+  vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(H, V), 5.0);
+  
+  // Calculate the geometric attenuation term
+  float NdotV = max(dot(N, V), 0.0);
+  float NdotL = max(dot(N, L), 0.0);
+  float NdotH = max(dot(N, H), 0.0);
+  float VdotH = max(dot(V, H), 0.0);
+  
+  float k = (material.roughness + 1.0) * (material.roughness + 1.0) / 8.0;
+  float G_V = NdotV / (NdotV * (1.0 - k) + k);
+  float G_L = NdotL / (NdotL * (1.0 - k) + k);
+  float G = G_V * G_L;
+  
+  // Calculate the normal distribution function (NDF) using GGX/Trowbridge-Reitz
+  float alpha = material.roughness * material.roughness;
+  float alpha2 = alpha * alpha;
+  float denom = (NdotH * NdotH * (alpha2 - 1.0) + 1.0);
+  float D = alpha2 / (PI * denom * denom);
+  
+  // Combine terms to get the specular BRDF
+  vec3 specular = (F * G * D) / (4.0 * NdotV * NdotL);
+  
+  return specular;
+}
+
+vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+  if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
+    return CalculateLambertianBRDF(material);
+  }
+  else if (material.type == MATERIAL_TYPE_SPECULAR) {
+    return CalculateSpecularBRDF(material, in_direction, out_direction, normal_direction);
+  }
+}
+
+#endif

@@ -23,23 +23,38 @@ void LoadCornellBox(Scene *scene) {
     return vertex;
   };
 
-  // Create a sphere
-Mesh sphere_mesh;
-glm::vec3 sphere_position = glm::vec3(243.0f, 248.7f, 227.0f);  // Position of the sphere
-sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
-int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
+	// Create a pointlight
+	Mesh light_sphere_mesh;
+  glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
+  light_sphere_mesh.CreateSphere(light_sphere_position, 1.0f, 16, 16);  // Small sphere with radius 10
+  int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
 
-Material sphere_material;
-sphere_material.base_color = {0.8f, 0.8f, 0.8f};  // Blue color
-sphere_material.type=MATERIAL_TYPE_SPECULAR;
-int sphere_id = scene->CreateEntity();
-scene->SetEntityMesh(sphere_id, sphere_mesh_id);
-scene->SetEntityMaterial(sphere_id, sphere_material);
+  Material light_sphere_material;
+  light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
+  light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
+  light_sphere_material.emission_strength = 10000.0f;  // Adjust the strength as needed
+  light_sphere_material.type = MATERIAL_TYPE_POINTLIGHT;
+  int light_sphere_id = scene->CreateEntity();
+  scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
+  scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
 
-Mesh bunny_mesh;
-bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
-bunny_mesh.scale(100.0f);
-bunny_mesh.translate(glm::vec3(100.0f, 100.0f, 100.0f));
+	// Create a sphere
+	Mesh sphere_mesh;
+	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
+	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
+	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
+
+	Material sphere_material;
+	sphere_material.base_color = {0.8f, 0.8f, 0.8f};
+	sphere_material.type=MATERIAL_TYPE_LAMBERTIAN;
+	int sphere_id = scene->CreateEntity();
+	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
+	scene->SetEntityMaterial(sphere_id, sphere_material);
+
+	Mesh bunny_mesh;
+	bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
+	bunny_mesh.scale(100.0f);
+	bunny_mesh.translate(glm::vec3(400.0f, -40.0f, 100.0f));
 
   int bunny_mesh_id =
       asset_manager->LoadMesh(bunny_mesh, "BunnyMesh"); 
@@ -93,17 +108,17 @@ bunny_mesh.translate(glm::vec3(100.0f, 100.0f, 100.0f));
 
   Texture terrain_texture;
   terrain_texture.LoadFromFile(
-      FindAssetsFile("texture/terrain/dog.jpg"),
+      FindAssetsFile("texture/earth.jpg"),
       LDRColorSpace::UNORM);
 
-  Texture terrain_detail_texture;
-  terrain_detail_texture.LoadFromFile(
-      FindAssetsFile("texture/terrain/dog.jpg"), LDRColorSpace::UNORM);
+//   Texture terrain_detail_texture;
+// //   terrain_detail_texture.LoadFromFile(
+// //       FindAssetsFile("texture/earth_clouds.jpg"), LDRColorSpace::UNORM);
   auto terrain_texture_id =
       asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
-  auto terrain_detail_texture_id = asset_manager->LoadTexture(
-      terrain_detail_texture, "TerrainDetailTexture");
+//   auto terrain_detail_texture_id = asset_manager->LoadTexture(
+//       terrain_detail_texture, "TerrainDetailTexture");
 
 
   // ceiling
@@ -142,7 +157,7 @@ bunny_mesh.translate(glm::vec3(100.0f, 100.0f, 100.0f));
   scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
   scene->SetEntityMaterial(back_wall_id, back_wall_material);
   scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
-  scene->SetEntityAlbedoDetailTexture(back_wall_id, terrain_detail_texture_id);
+//   scene->SetEntityAlbedoDetailTexture(back_wall_id, terrain_detail_texture_id);
   // right_wall
   // <vertex position="0.0   0.0 559.2 " tex_coord="0 0"/>
   // <vertex position = "0.0   0.0   0.0" tex_coord = "1 0" />

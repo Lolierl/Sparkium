@@ -1,6 +1,8 @@
 #ifndef SAMPLE_GLSL
 #define SAMPLE_GLSL
 #include "random.glsl"
+#include "material.glsl"
+#include "bxdf.glsl"
 
 /*All Sample Point Struct*/
 struct LightSamplePoint
@@ -9,6 +11,13 @@ struct LightSamplePoint
   uint mesh_id, primitive_id; 
   float pdf; 
 };
+
+struct SampleDirection
+{
+  vec3 direction;
+  float pdf; 
+};
+
 struct SamplePoint
 {
   vec3 position;
@@ -145,4 +154,45 @@ vec3 GGXsampleMicroNormal(float alpha, vec3 N)
 		B * (sin(theta) * sin(phi)) +
 		N * cos(theta);
 }
+
+SampleDirection SampleLambertianTransportDirection(vec3 normal_direction) {
+  float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+  float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
+
+  float r = sqrt(u1);
+  float theta = 2.0 * PI * u2;
+
+  float x = r * cos(theta);
+  float y = r * sin(theta);
+  float z = sqrt(1.0 - u1);
+
+  vec3 local_dir = vec3(x, y, z);
+
+  vec3 tangent = normalize(cross(abs(normal_direction.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal_direction));
+  vec3 bitangent = cross(normal_direction, tangent);
+
+  SampleDirection ret;
+  ret.direction = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal_direction;
+  ret.direction = normalize(ret.direction);
+  ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
+  return ret;
+}
+
+SampleDirection SampleSpecularTransportDirection(vec3 in_direction, vec3 normal_direction) {
+  SampleDirection ret;
+  ret.pdf = 1;
+  ret.direction = ReflectionDirection(normal_direction, in_direction);
+  return ret;
+}
+
+
+SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction) {
+  if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
+    return SampleLambertianTransportDirection(normal_direction);
+  }
+  else if (material.type == MATERIAL_TYPE_SPECULAR) {
+    return SampleSpecularTransportDirection(in_direction, normal_direction);
+  }
+}
+
 #endif

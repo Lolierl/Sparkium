@@ -8,6 +8,8 @@ namespace sparkium {
 std::vector<std::pair<std::string, std::function<void(Scene *scene)>>>
 BuiltInSceneList();
 
+void LoadSunFlowerDog(Scene *scene); 
+
 void LoadCornellBox(Scene *scene);
 
 void LoadIslandScene(Scene *scene);

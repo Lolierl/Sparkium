@@ -24,6 +24,15 @@ struct SamplePoint
   float pdf; 
 };
 
+vec3 perpendicular(vec3 normal) {
+  // Pick a reference vector different from the normal
+  vec3 reference = abs(normal.x) < 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+  
+  // Compute a vector orthogonal to the normal
+  vec3 tangent = normalize(cross(normal, reference));
+  return tangent;
+}
+
 vec3 UniformSampleTriangle(vec3 v0, vec3 v1, vec3 v2) 
 {
     float u1 = RandomFloat();
@@ -58,27 +67,6 @@ LightSamplePoint SampleDirectLighting(vec3 origin)
   float entity_pdf = metadatas[entity_id].emission_cdf - ((entity_id == 0) ? 0 : metadatas[entity_id - 1].emission_cdf); 
   Material material = materials[entity_id]; 
   uint mesh_id = metadatas[entity_id].mesh_id; 
-  /*if(material.type == MATERIAL_TYPE_POINTLIGHT)
-  {
-    LightSamplePoint ret; 
-    vec3 vertex = vec3(0, 0, 0); 
-    float dist = 1e9; 
-    for(int i = 0; i < mesh_metadatas[mesh_id].num_index; i++)
-    {
-      uint v_id = index_buffers[mesh_id].indices[i]; 
-      vec3 v = GetVertex(mesh_id, v_id).position;
-      if(distance(v, origin) < dist)
-      {
-        vertex = v; 
-        dist = distance(v, origin); 
-      }
-    }
-    ret.position = vertex; 
-    ret.mesh_id = mesh_id; 
-    ret.primitive_id = 0; 
-    ret.pdf = entity_pdf; 
-    return ret;
-  }*/
   
   u = RandomFloat();
   int primitive_id = 0; 
@@ -211,7 +199,6 @@ SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_di
   ret.pdf = 1;
 
   vec3 reflection_direction = ReflectionDirection(normal, in_direction); 
-  float cos_theta = -dot(in_direction, normal);
   float etap = (inside < 1e-3) ? material.ior : 1.0 / material.ior;
   vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
   float ratio = FresnelReflectionRate(in_direction, normal, etap); 
@@ -228,6 +215,47 @@ SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_di
   return ret;
 }
 
+SampleDirection SampleMetalTransportDirection(Material material, vec3 in_direction, vec3 normal) {
+  // Step 1: Generate random values
+  float u1 = RandomFloat(); // Random number in [0, 1]
+  float u2 = RandomFloat(); // Random number in [0, 1]
+
+  // Step 2: GGX sampling (spherical coordinates)
+  float alpha = material.roughness * material.roughness;
+  float theta = atan(alpha * sqrt(u1 / (1.0 - u1))); // GGX theta
+  float phi = 2.0 * PI * u2;                        // Uniform azimuthal angle
+
+  // Convert spherical to Cartesian coordinates
+  float sinTheta = sin(theta);
+  float cosTheta = cos(theta);
+  vec3 h = vec3(
+      sinTheta * cos(phi),
+      sinTheta * sin(phi),
+      cosTheta
+  );
+
+  // Transform half-vector h to world space
+  vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));  // Generate tangent vector
+  vec3 bitangent = cross(normal, tangent);
+  mat3 tbn = mat3(tangent, bitangent, normal);      // TBN matrix
+  h = normalize(tbn * h);
+
+  // Step 3: Reflect incoming direction around the half-vector
+  vec3 outDir = ReflectionDirection(h, in_direction);
+
+  // Step 4: Compute the PDF
+  float dotNH = max(dot(normal, h), 0.0);
+  float D = (alpha * alpha) / (PI * pow((dotNH * dotNH) * (alpha * alpha - 1.0) + 1.0, 2.0));
+  float pdf = D * dotNH / (4.0 * max(dot(outDir, h), 0.0));
+
+  SampleDirection ret;
+  ret.pdf = pdf;
+  ret.direction = normalize(outDir);
+
+  return ret;
+
+}
+
 SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return SampleLambertianTransportDirection(normal_direction);
@@ -237,6 +265,10 @@ SampleDirection SampleTransportDirection(Material material, vec3 in_direction, v
   }
   else if (material.type == MATERIAL_TYPE_RETRACTIVE) {
     return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside);
+  }
+  else if (material.type == MATERIAL_TYPE_METAL) {
+    // return SampleLambertianTransportDirection(normal_direction);
+    return SampleMetalTransportDirection(material, in_direction, normal_direction);
   }
 }
 

@@ -96,7 +96,7 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
   // Normalize input vectors
   vec3 N = normalize(normal_direction);
   vec3 V = normalize(out_direction);
-  vec3 L = normalize(in_direction);
+  vec3 L = normalize(-in_direction);
     
   // Calculate the half vector
   vec3 H = normalize(V + L);
@@ -106,10 +106,10 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
   vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(H, V), 5.0);
   
   // Calculate the geometric attenuation term
-  float NdotV = max(dot(N, V), 0.0);
-  float NdotL = max(dot(N, L), 0.0);
-  float NdotH = max(dot(N, H), 0.0);
-  float VdotH = max(dot(V, H), 0.0);
+  float NdotV = max(dot(N, V), 1e-4);
+  float NdotL = max(dot(N, L), 1e-4);
+  float NdotH = max(dot(N, H), 1e-4);
+  float VdotH = max(dot(V, H), 1e-4);
   
   float k = (material.roughness + 1.0) * (material.roughness + 1.0) / 8.0;
   float G_V = NdotV / (NdotV * (1.0 - k) + k);
@@ -137,6 +137,9 @@ vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec
   }
   else if(material.type == MATERIAL_TYPE_RETRACTIVE) {
     return CalculateRetractiveBSDF(material, in_direction, out_direction, normal_direction, inside);
+  }
+  else if(material.type == MATERIAL_TYPE_METAL) {
+    return CalculateMetalBRDF(material, in_direction, out_direction, normal_direction);
   }
 }
 

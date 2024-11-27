@@ -34,7 +34,7 @@ void LoadCornellBox(Scene *scene) {
   light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
   light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
   light_sphere_material.emission_strength = 1000.0f;  // Adjust the strength as needed
-  light_sphere_material.type = MATERIAL_TYPE_POINTLIGHT;
+  light_sphere_material.type = MATERIAL_TYPE_LAMBERTIAN;
   int light_sphere_id = scene->CreateEntity();
   scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
   scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
@@ -46,9 +46,10 @@ void LoadCornellBox(Scene *scene) {
 	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
 
 	Material sphere_material;
-	sphere_material.base_color = {0.8f, 0.8f, 0.8f};
-	sphere_material.type=MATERIAL_TYPE_RETRACTIVE;
-  sphere_material.ior = 1.5; 
+	sphere_material.base_color = {1.000, 0.766, 0.336};
+	sphere_material.type = MATERIAL_TYPE_METAL;
+  sphere_material.roughness = 0.4; 
+	sphere_material.ior = 1.2;
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);
@@ -351,8 +352,9 @@ void LoadCornellBox(Scene *scene) {
   int tall_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "TallBoxMesh");
   Material tall_box_material;
-  tall_box_material.type = MATERIAL_TYPE_LAMBERTIAN;
+  tall_box_material.type = MATERIAL_TYPE_RETRACTIVE;
   tall_box_material.base_color = {0.8f, 0.8f, 0.8f};
+	tall_box_material.ior = 1.4;
   int tall_box_id = scene->CreateEntity();
   scene->SetEntityMesh(tall_box_id, tall_box_mesh_id);
   scene->SetEntityMaterial(tall_box_id, tall_box_material);

@@ -8,11 +8,141 @@ namespace sparkium {
 std::vector<std::pair<std::string, std::function<void(Scene *scene)>>>
 BuiltInSceneList() {
   return {
+      {"SunFlower Dog", LoadSunFlowerDog},
       {"Cornell Box", LoadCornellBox},
       {"Island Scene", LoadIslandScene},
   };
 }
 
+void LoadSunFlowerDog(Scene *scene)
+{
+  AssetManager *asset_manager = scene->Renderer()->AssetManager();
+
+  auto make_vertex = [](const glm::vec3 &pos, const glm::vec2 &tex_coord) {
+    Vertex vertex;
+    vertex.position = pos;
+    vertex.tex_coord = tex_coord;
+    return vertex;
+  };
+  std::vector<Vertex> vertices;
+  std::vector<uint32_t> indices = {0, 1, 3, 1, 2, 3};
+
+  // light
+  // <vertex position="343.0 548.7 227.0" tex_coord="0 0"/>
+  // <vertex position="343.0 548.7 332.0" tex_coord="1 0"/>
+  // <vertex position="213.0 548.7 332.0" tex_coord="1 1"/>
+  // <vertex position="213.0 548.7 227.0" tex_coord="0 1"/>
+  //light
+  vertices.push_back(make_vertex({343.0f, 548.7f, 227.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({343.0f, 548.7f, 332.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({213.0f, 548.7f, 332.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({213.0f, 548.7f, 227.0f}, {0.0f, 1.0f}));
+  int light_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "LightMesh");
+  Material light_material;
+  light_material.base_color = {0.0f, 0.0f, 0.0f};
+  light_material.emission = {1.0f, 1.0f, 1.0f};
+  light_material.emission_strength = 30.0f;
+  int light_id = scene->CreateEntity();
+  scene->SetEntityMesh(light_id, light_mesh_id);
+  scene->SetEntityMaterial(light_id, light_material);
+
+
+  Mesh plate_mesh;
+	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
+	plate_mesh.scale(100.0f);
+	plate_mesh.translate(glm::vec3(400.0f, 60.0f, 100.0f));
+
+  int plate_mesh_id =
+      asset_manager->LoadMesh(plate_mesh, "PlateMesh"); 
+
+  Material plate_material;
+  plate_material.base_color = {0.8f, 0.8f, 0.8f};
+  plate_material.type=MATERIAL_TYPE_SPECULAR;
+  int plate_id = scene->CreateEntity();
+  scene->SetEntityMesh(plate_id, plate_mesh_id);
+  scene->SetEntityMaterial(plate_id, plate_material);
+  vertices.clear();
+  vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 1.0f}));
+  int floor_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "FloorMesh");
+  Material floor_material;
+  floor_material.base_color = {0.8f, 0.8f, 0.8f};
+  int floor_id = scene->CreateEntity();
+  scene->SetEntityMesh(floor_id, floor_mesh_id);
+  scene->SetEntityMaterial(floor_id, floor_material);
+
+  Texture terrain_texture;
+  terrain_texture.LoadFromFile(
+      FindAssetsFile("texture/earth.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto terrain_texture_id =
+      asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
+
+  vertices.clear();
+  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  int ceiling_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
+  Material ceiling_material;
+  ceiling_material.base_color = {0.8f, 0.8f, 0.8f};
+  int ceiling_id = scene->CreateEntity();
+  scene->SetEntityMesh(ceiling_id, ceiling_mesh_id);
+  scene->SetEntityMaterial(ceiling_id, ceiling_material);
+
+  vertices.clear();
+  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  int back_wall_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "BackWallMesh");
+  Material back_wall_material;
+  back_wall_material.base_color = {0.8f, 0.8f, 0.8f};
+  int back_wall_id = scene->CreateEntity();
+  scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
+  scene->SetEntityMaterial(back_wall_id, back_wall_material);
+  scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+
+  vertices.clear();
+  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  int right_wall_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
+  Material right_wall_material;
+  right_wall_material.base_color = {0.0, 0.8, 0.0};
+  int right_wall_id = scene->CreateEntity();
+  scene->SetEntityMesh(right_wall_id, right_wall_mesh_id);
+  scene->SetEntityMaterial(right_wall_id, right_wall_material);
+
+  vertices.clear();
+  vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  int left_wall_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
+  Material left_wall_material;
+  left_wall_material.base_color = {0.8f, 0.0f, 0.0f};
+  int left_wall_id = scene->CreateEntity();
+  scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
+  scene->SetEntityMaterial(left_wall_id, left_wall_material);
+
+  scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
+  scene->Camera()->SetPosition({278.0f, 273.0f, -800.0f});
+  scene->Camera()->SetEulerAngles({0.0f, glm::radians(180.0f), 0.0f});
+  scene->Camera()->SetFov(glm::radians(40.0f));
+  scene->Camera()->SetFar(2000.0f);
+  scene->Camera()->SetCameraSpeed(100.0f);
+}
 void LoadCornellBox(Scene *scene) {
   AssetManager *asset_manager = scene->Renderer()->AssetManager();
 

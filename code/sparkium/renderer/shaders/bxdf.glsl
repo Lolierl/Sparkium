@@ -64,8 +64,10 @@ vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direct
   // Check if the view direction matches the reflection direction
   float match = max(dot(truth, out_direction), 0.0);
 
+  vec3 specular = (match > 0.9999) ? material.base_color : vec3(0.0);
+
   // For perfect specular, we only reflect in the perfect mirror direction
-  return (match > 0.9999) ? material.base_color : vec3(0.0);
+  return specular / abs(dot(normal_direction, -in_direction));
 }
 
 vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal, float inside) {
@@ -81,11 +83,11 @@ vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_dire
   
   if(match1 > 0.9999)
   {
-    return material.base_color * ratio;
+    return material.base_color * ratio / abs(dot(normal, -in_direction));
   }
   else if(match2 > 0.9999)
   {
-    return material.base_color * (1 - ratio) / etap / etap;
+    return material.base_color * (1 - ratio) / etap / etap / abs(dot(normal, -in_direction));
   }
   else
   {

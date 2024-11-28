@@ -120,9 +120,11 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   } 
 
   /*Hit an entity A*/ 
-  normal = hit_record.shading_normal; 
+  normal = hit_record.geometry_normal; 
   origin = hit_record.position; 
   float cos_theta = 1.0f;
+  if(dot(normal, direction) > 0)
+    normal = -normal; 
  
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
@@ -131,12 +133,14 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     // else
     //   throughput /= RR;
     bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
+    
     /*1. LightSource -> entity A -> eye*/
     if(is_LAMBERTIAN)
     {
       LightSamplePoint light_sample_point = SampleDirectLighting(origin);
       float r = distance(origin, light_sample_point.position); 
       vec3 new_direction = normalize(light_sample_point.position - origin);
+      if(dot(normal, new_direction) < 0)break; 
       bxdf = CalculateBxDF(material, new_direction, direction, normal, inside);
       if(ShadowRay(origin + new_direction * 1e-4, new_direction, r) > 1e-3)
       {
@@ -144,10 +148,10 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         hit_record = ComposeHitRecord(ray_payload, origin + new_direction * 1e-4, new_direction);
         Material light_material = GetMaterial(hit_record);
         cos_theta = dot(normal, new_direction);
-        radiance += throughput * bxdf * cos_theta * light_material.emission * light_material.emission_strength * (-dot(hit_record.shading_normal, new_direction)) / (r*r) / light_sample_point.pdf;  
+        radiance += throughput * bxdf * cos_theta * light_material.emission * light_material.emission_strength * (-dot(hit_record.geometry_normal, new_direction)) / (r*r) / light_sample_point.pdf;  
       }  
     }
-    
+     
     /*2. Else -> entity A -> eye*/
     SampleDirection sample_direction = SampleTransportDirection(material, direction, normal, inside); 
     vec3 new_direction = sample_direction.direction;
@@ -170,7 +174,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     if(material.emission_strength < 1e-4) {
       origin = hit_record.position;
       direction = new_direction; 
-      normal = hit_record.shading_normal; 
+      normal = hit_record.geometry_normal; 
     } else 
     {
       if(!is_LAMBERTIAN)
@@ -179,6 +183,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       }
       break; 
     }
+    if(dot(direction, normal) > 0)normal = -normal; 
     // if(material.type == MATERIAL_TYPE_LAMBERTIAN)
     // {
     //   /*1.LightSource*/
@@ -320,7 +325,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     //   if (ray_payload.t == -1.0) {
     //       radiance += throughput * EnvmapSample(new_direction);
     //       break; 
-    //   }  
+    //   }    
 
     //   hit_record = ComposeHitRecord(ray_payload, origin, new_direction);
     //   material = GetMaterial(hit_record);

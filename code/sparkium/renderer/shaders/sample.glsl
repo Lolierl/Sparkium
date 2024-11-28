@@ -189,6 +189,8 @@ SampleDirection SampleLambertianTransportDirection(vec3 normal_direction) {
 }
 
 SampleDirection SampleSpecularTransportDirection(vec3 in_direction, vec3 normal_direction) {
+  if(dot(in_direction, normal_direction) > 0)
+    normal_direction = -normal_direction;
   SampleDirection ret;
   ret.pdf = 1;
   ret.direction = ReflectionDirection(normal_direction, in_direction);

@@ -33,15 +33,15 @@ void LoadSunFlowerDog(Scene *scene)
   // <vertex position="213.0 548.7 332.0" tex_coord="1 1"/>
   // <vertex position="213.0 548.7 227.0" tex_coord="0 1"/>
   //light
-  vertices.push_back(make_vertex({343.0f, 548.7f, 227.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({343.0f, 548.7f, 332.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({213.0f, 548.7f, 332.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({213.0f, 548.7f, 227.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({343.0f, 648.7f, 227.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({343.0f, 648.7f, 332.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({213.0f, 648.7f, 332.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({213.0f, 648.7f, 227.0f}, {0.0f, 1.0f}));
   int light_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LightMesh");
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
-  light_material.emission = {1.0f, 1.0f, 1.0f};
+  light_material.emission = {1.0f, 1.0f, 0.6f};
   light_material.emission_strength = 30.0f;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
@@ -51,14 +51,14 @@ void LoadSunFlowerDog(Scene *scene)
   Mesh plate_mesh;
 	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
 	plate_mesh.scale(50.0f);
-	plate_mesh.translate(glm::vec3(150.0f, 190.0f, 100.0f));
+	plate_mesh.translate(glm::vec3(210.0f, 190.0f, 100.0f));
 
   int plate_mesh_id =
       asset_manager->LoadMesh(plate_mesh, "PlateMesh"); 
 
   Material plate_material;
-  plate_material.base_color = {1.000f, 0.766f, 0.336f};
-	plate_material.type=MATERIAL_TYPE_METAL;
+  plate_material.base_color = {1.000f, 1.000f, 1.000f};
+	plate_material.type=MATERIAL_TYPE_LAMBERTIAN;
   plate_material.roughness = 0.4;
   plate_material.ior = 1.5; 
   
@@ -92,6 +92,32 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(table_id, table_material);
   scene->SetEntityAlbedoTexture(table_id, table_texture_id);
 
+  Mesh chair_mesh;
+	chair_mesh.LoadObjFile(FindAssetsFile("mesh/chair/chair.obj"));
+	chair_mesh.scale(200.0f);
+	chair_mesh.translate(glm::vec3(200.0f, 0.0f, -100.0f));
+
+  int chair_mesh_id =
+      asset_manager->LoadMesh(chair_mesh, "ChairMesh"); 
+
+  Material chair_material;
+  //chair_material.base_color = {1.000f, 0.766f, 0.336f};
+	chair_material.type=MATERIAL_TYPE_LAMBERTIAN;
+  chair_material.roughness = 0.4;
+  chair_material.ior = 1.5; 
+  
+  Texture chair_texture;
+  chair_texture.LoadFromFile(
+      FindAssetsFile("texture/chair/chair_01_Base_Color.png"),
+      LDRColorSpace::UNORM);
+
+  auto chair_texture_id =
+      asset_manager->LoadTexture(chair_texture, "ChairTexture");
+  int chair_id = scene->CreateEntity();
+  scene->SetEntityMesh(chair_id, chair_mesh_id);
+  scene->SetEntityMaterial(chair_id, chair_material);
+  scene->SetEntityAlbedoTexture(chair_id, chair_texture_id);
+
   Mesh glass_mesh;
 	glass_mesh.LoadObjFile(FindAssetsFile("mesh/Glass/Glass OBJ.obj"));
 	glass_mesh.scale(40.0f);
@@ -113,7 +139,7 @@ void LoadSunFlowerDog(Scene *scene)
   Mesh bread_mesh;
 	bread_mesh.LoadObjFile(FindAssetsFile("mesh/Bread/Bread.obj"));
 	bread_mesh.scale(30.0f);
-	bread_mesh.translate(glm::vec3(150.0f, 210.0f, 85.0f));
+	bread_mesh.translate(glm::vec3(210.0f, 210.0f, 85.0f));
 
   int bread_mesh_id =
       asset_manager->LoadMesh(bread_mesh, "BreadMesh"); 
@@ -135,39 +161,36 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(bread_id, bread_mesh_id);
   scene->SetEntityMaterial(bread_id, bread_material);
   scene->SetEntityAlbedoTexture(bread_id, bread_texture_id);
-/*
+
   Mesh spoon_mesh;
 	spoon_mesh.LoadObjFile(FindAssetsFile("mesh/Spoon/Spoon.obj"));
-  spoon_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-  spoon_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
-  spoon_mesh.rotate(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)); 
-  //spoon_mesh.rotate(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  spoon_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
   //spoon_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
   //spoon_mesh.rotate(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
   //spoon_mesh.rotate(180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-	spoon_mesh.scale(150.0f);
-	spoon_mesh.translate(glm::vec3(440.0f, 250.0f, 0.0f));
+	spoon_mesh.scale(40.0f);
+	spoon_mesh.translate(glm::vec3(90.0f, 200.0f, 70.0f));
   
   int spoon_mesh_id =
       asset_manager->LoadMesh(spoon_mesh, "SpoonMesh"); 
 
   Material spoon_material;
   spoon_material.base_color = {1.000f, 1.000f, 1.000f};
-	spoon_material.type=MATERIAL_TYPE_LAMBERTIAN;
+	spoon_material.type=MATERIAL_TYPE_METAL;
   spoon_material.roughness = 0.1;
   //spoon_material.ior = 1.5; 
   
   int spoon_id = scene->CreateEntity();
   scene->SetEntityMesh(spoon_id, spoon_mesh_id);
   scene->SetEntityMaterial(spoon_id, spoon_material);
-*/
+
   Mesh fork_mesh;
 	fork_mesh.LoadObjFile(FindAssetsFile("mesh/Fork/Fork.obj"));
   fork_mesh.rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
   fork_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	fork_mesh.scale(40.0f);
-	fork_mesh.translate(glm::vec3(260.0f, 200.0f,  73.0f));
+	fork_mesh.translate(glm::vec3(130.0f, 200.0f,  73.0f));
 
   int fork_mesh_id =
       asset_manager->LoadMesh(fork_mesh, "ForkMesh"); 
@@ -191,7 +214,7 @@ void LoadSunFlowerDog(Scene *scene)
 	knife_mesh.LoadObjFile(FindAssetsFile("mesh/Knife/Knife.obj"));
   knife_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	knife_mesh.scale(40.0f);
-	knife_mesh.translate(glm::vec3(250.0f, 200.0f, 85.0f));
+	knife_mesh.translate(glm::vec3(120.0f, 200.0f, 85.0f));
 
   int knife_mesh_id =
       asset_manager->LoadMesh(knife_mesh, "KnifeMesh"); 
@@ -214,31 +237,39 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(knife_id, knife_material);
 
   vertices.clear();
-  vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {0.0f, 1.0f}));
   int floor_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "FloorMesh");
   Material floor_material;
-  floor_material.base_color = {0.0f, 0.0f, 0.8f};
+  //floor_material.base_color = {0.0f, 0.0f, 0.8f};
+  Texture floor_texture;
+  floor_texture.LoadFromFile(
+      FindAssetsFile("texture/floor.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto floor_texture_id =
+      asset_manager->LoadTexture(floor_texture, "FloorTexture");
   int floor_id = scene->CreateEntity();
   scene->SetEntityMesh(floor_id, floor_mesh_id);
   scene->SetEntityMaterial(floor_id, floor_material);
+  scene->SetEntityAlbedoTexture(floor_id, floor_texture_id);
 
   Texture terrain_texture;
   terrain_texture.LoadFromFile(
-      FindAssetsFile("texture/earth.jpg"),
+      FindAssetsFile("texture/dog.jpg"),
       LDRColorSpace::UNORM);
 
   auto terrain_texture_id =
       asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
   vertices.clear();
-  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 648.8f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 648.8f, -400.0f}, {0.0f, 1.0f}));
   int ceiling_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
   Material ceiling_material;
@@ -248,10 +279,10 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(ceiling_id, ceiling_material);
 
   vertices.clear();
-  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   int back_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "BackWallMesh");
   Material back_wall_material;
@@ -262,34 +293,34 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
 
   vertices.clear();
-  vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 648.8f, -400.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
   Material right_wall_material;
-  right_wall_material.base_color = {0.0, 0.8, 0.0};
+  right_wall_material.base_color = {0.8, 0.8, 0.8};
   int right_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(right_wall_id, right_wall_mesh_id);
   scene->SetEntityMaterial(right_wall_id, right_wall_material);
 
   vertices.clear();
-  vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 648.8f, -400.0f}, {0.0f, 1.0f}));
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;
-  left_wall_material.base_color = {0.8f, 0.0f, 0.0f};
+  left_wall_material.base_color = {0.8f, 0.8f, 0.8f};
   int left_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
   //(LR, UD, FB)
   scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
-  scene->Camera()->SetPosition({278.0f, 423.0f, -400.0f});
-  scene->Camera()->SetEulerAngles({glm::radians(-20.0f), glm::radians(180.0f), 0.0f});
+  scene->Camera()->SetPosition({308.0f, 563.0f, -500.0f});
+  scene->Camera()->SetEulerAngles({glm::radians(-30.0f), glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
   scene->Camera()->SetFar(2000.0f);
   scene->Camera()->SetCameraSpeed(100.0f);
@@ -384,6 +415,7 @@ void LoadCornellBox(Scene *scene) {
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 1.0f}));
   int floor_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "FloorMesh");
+
   Material floor_material;
   floor_material.base_color = {0.8f, 0.8f, 0.8f};
   int floor_id = scene->CreateEntity();
@@ -406,15 +438,15 @@ void LoadCornellBox(Scene *scene) {
 
 
   // ceiling
-  // <vertex position="556.0 548.8 0.0  " tex_coord="0 0"/>
-  // <vertex position="556.0 548.8 559.2" tex_coord="1 0"/>
-  // <vertex position="0.0 548.8 559.2" tex_coord="1 1"/>
-  // <vertex position="0.0 548.8   0.0" tex_coord="0 1"/>
+  // <vertex position="556.0 648.8 0.0  " tex_coord="0 0"/>
+  // <vertex position="556.0 648.8 559.2" tex_coord="1 0"/>
+  // <vertex position="0.0 648.8 559.2" tex_coord="1 1"/>
+  // <vertex position="0.0 648.8   0.0" tex_coord="0 1"/>
   vertices.clear();
-  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 648.8f, 0.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 648.8f, 0.0f}, {0.0f, 1.0f}));
   int ceiling_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
   Material ceiling_material;
@@ -426,13 +458,13 @@ void LoadCornellBox(Scene *scene) {
   // back_wall
   // <vertex position="549.6   0.0 559.2" tex_coord="0 0"/>
   // <vertex position="0.0   0.0 559.2" tex_coord="1 0"/>
-  // <vertex position="0.0 548.8 559.2" tex_coord="1 1"/>
-  // <vertex position="556.0 548.8 559.2" tex_coord="0 1"/>
+  // <vertex position="0.0 648.8 559.2" tex_coord="1 1"/>
+  // <vertex position="556.0 648.8 559.2" tex_coord="0 1"/>
   vertices.clear();
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
   int back_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "BackWallMesh");
   Material back_wall_material;
@@ -445,13 +477,13 @@ void LoadCornellBox(Scene *scene) {
   // right_wall
   // <vertex position="0.0   0.0 559.2 " tex_coord="0 0"/>
   // <vertex position = "0.0   0.0   0.0" tex_coord = "1 0" />
-  // <vertex position = "0.0 548.8   0.0" tex_coord = "1 1" />
-  // <vertex position = "0.0 548.8 559.2" tex_coord = "0 1" />
+  // <vertex position = "0.0 648.8   0.0" tex_coord = "1 1" />
+  // <vertex position = "0.0 648.8 559.2" tex_coord = "0 1" />
   vertices.clear();
   vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 648.8f, 0.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
   Material right_wall_material;
@@ -463,13 +495,13 @@ void LoadCornellBox(Scene *scene) {
   // left_wall
   // <vertex position="552.8   0.0   0.0 " tex_coord="0 0"/>
   // <vertex position = "549.6   0.0 559.2" tex_coord = "1 0" />
-  // <vertex position = "556.0 548.8 559.2" tex_coord = "1 1" />
-  // <vertex position = "556.0 548.8   0.0" tex_coord = "0 1" />
+  // <vertex position = "556.0 648.8 559.2" tex_coord = "1 1" />
+  // <vertex position = "556.0 648.8   0.0" tex_coord = "0 1" />
   vertices.clear();
   vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 648.8f, 0.0f}, {0.0f, 1.0f}));
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;

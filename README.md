@@ -1,3 +1,10 @@
+### Acknowledgement
+This project uses framework from the sparkium renderer by @LazyJazz. 
+
+### Demo creation process
+demo/demo.png is the demo submitted in the midterm report. However due to algorithm optimization and changes of the scene, it cannot be exactly reproduced. 
+We have submitted another demo, demo/demo2.png, which is our latest result shown in the oral report. It can be reproduced following commands below, turning persistence to 1.00 and wait until about 3000 samples are accumulated. 
+
 # Sparkium Renderer (星火渲染器-开源版)
 
 <!-- TOC -->

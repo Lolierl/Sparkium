@@ -13,7 +13,7 @@ BuiltInSceneList() {
       {"Island Scene", LoadIslandScene},
   };
 }
-//(LR, UD, FB)
+// (LR, UD, FB)
 void LoadSunFlowerDog(Scene *scene)
 {
   AssetManager *asset_manager = scene->Renderer()->AssetManager();
@@ -336,50 +336,50 @@ void LoadCornellBox(Scene *scene) {
   };
 
 	// Create a pointlight
-  
-	// Mesh light_sphere_mesh;
-  // glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
-  // light_sphere_mesh.CreateSphere(light_sphere_position, 1.0f, 4, 4);  // Small sphere with radius 10
-  // int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
 
-  // Material light_sphere_material;
-  // light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
-  // light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
-  // light_sphere_material.emission_strength = 1000.0f;  // Adjust the strength as needed
-  // light_sphere_material.type = MATERIAL_TYPE_LAMBERTIAN;
-  // int light_sphere_id = scene->CreateEntity();
-  // scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
-  // scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
+	Mesh light_sphere_mesh;
+  glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
+  light_sphere_mesh.CreateSphere(light_sphere_position, 1.0f, 4, 4);  // Small sphere with radius 10
+  int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
 
-	//  // Create a sphere
-	// Mesh sphere_mesh;
-	// glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
-	// sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
-	// int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
+  Material light_sphere_material;
+  light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
+  light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
+  light_sphere_material.emission_strength = 1000.0f;  // Adjust the strength as needed
+  light_sphere_material.type = MATERIAL_TYPE_LAMBERTIAN;
+  int light_sphere_id = scene->CreateEntity();
+  scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
+  scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
 
-	// Material sphere_material;
-	// sphere_material.base_color = {1.000f, 0.766f, 0.336f};
-	// sphere_material.type=MATERIAL_TYPE_METAL;
-  // sphere_material.roughness = 0.4;
-  // sphere_material.ior = 1.5; 
-	// int sphere_id = scene->CreateEntity();
-	// scene->SetEntityMesh(sphere_id, sphere_mesh_id);
-	// scene->SetEntityMaterial(sphere_id, sphere_material);
+	// Create a sphere
+	Mesh sphere_mesh;
+	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
+	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
+	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
 
-	// Mesh bunny_mesh;
-	// bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
-	// bunny_mesh.scale(100.0f);
-	// bunny_mesh.translate(glm::vec3(400.0f, -40.0f, 100.0f));
+	Material sphere_material;
+	sphere_material.base_color = {1.000, 0.766, 0.336};
+	sphere_material.type = MATERIAL_TYPE_METAL;
+  sphere_material.roughness = 0.4; 
+	sphere_material.ior = 1.2;
+	int sphere_id = scene->CreateEntity();
+	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
+	scene->SetEntityMaterial(sphere_id, sphere_material);
 
-  // int bunny_mesh_id =
-  //     asset_manager->LoadMesh(bunny_mesh, "BunnyMesh"); 
+	Mesh bunny_mesh;
+	bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
+	bunny_mesh.scale(100.0f);
+	bunny_mesh.translate(glm::vec3(400.0f, -40.0f, 100.0f));
 
-  // Material bunny_material;
-  // bunny_material.base_color = {0.8f, 0.8f, 0.8f};
-  // bunny_material.type=MATERIAL_TYPE_SPECULAR;
-  // int bunny_id = scene->CreateEntity();
-  // scene->SetEntityMesh(bunny_id, bunny_mesh_id);
-  // scene->SetEntityMaterial(bunny_id, bunny_material);
+  int bunny_mesh_id =
+      asset_manager->LoadMesh(bunny_mesh, "BunnyMesh"); 
+
+  Material bunny_material;
+  bunny_material.base_color = {0.8f, 0.8f, 0.8f};
+  bunny_material.type=MATERIAL_TYPE_SPECULAR;
+  int bunny_id = scene->CreateEntity();
+  scene->SetEntityMesh(bunny_id, bunny_mesh_id);
+  scene->SetEntityMaterial(bunny_id, bunny_material);
 
   std::vector<Vertex> vertices;
   std::vector<uint32_t> indices = {0, 1, 3, 1, 2, 3};
@@ -415,38 +415,37 @@ void LoadCornellBox(Scene *scene) {
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 1.0f}));
   int floor_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "FloorMesh");
-
   Material floor_material;
   floor_material.base_color = {0.8f, 0.8f, 0.8f};
   int floor_id = scene->CreateEntity();
   scene->SetEntityMesh(floor_id, floor_mesh_id);
   scene->SetEntityMaterial(floor_id, floor_material);
 
-  // Texture terrain_texture;
-  // terrain_texture.LoadFromFile(
-  //     FindAssetsFile("texture/earth.jpg"),
-  //     LDRColorSpace::UNORM);
+  Texture terrain_texture;
+  terrain_texture.LoadFromFile(
+      FindAssetsFile("texture/earth.jpg"),
+      LDRColorSpace::UNORM);
 
 //   Texture terrain_detail_texture;
 // //   terrain_detail_texture.LoadFromFile(
 // //       FindAssetsFile("texture/earth_clouds.jpg"), LDRColorSpace::UNORM);
-  // auto terrain_texture_id =
-  //     asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
+  auto terrain_texture_id =
+      asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
 //   auto terrain_detail_texture_id = asset_manager->LoadTexture(
 //       terrain_detail_texture, "TerrainDetailTexture");
 
 
   // ceiling
-  // <vertex position="556.0 648.8 0.0  " tex_coord="0 0"/>
-  // <vertex position="556.0 648.8 559.2" tex_coord="1 0"/>
-  // <vertex position="0.0 648.8 559.2" tex_coord="1 1"/>
-  // <vertex position="0.0 648.8   0.0" tex_coord="0 1"/>
+  // <vertex position="556.0 548.8 0.0  " tex_coord="0 0"/>
+  // <vertex position="556.0 548.8 559.2" tex_coord="1 0"/>
+  // <vertex position="0.0 548.8 559.2" tex_coord="1 1"/>
+  // <vertex position="0.0 548.8   0.0" tex_coord="0 1"/>
   vertices.clear();
-  vertices.push_back(make_vertex({556.0f, 648.8f, 0.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 648.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
   int ceiling_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
   Material ceiling_material;
@@ -458,13 +457,13 @@ void LoadCornellBox(Scene *scene) {
   // back_wall
   // <vertex position="549.6   0.0 559.2" tex_coord="0 0"/>
   // <vertex position="0.0   0.0 559.2" tex_coord="1 0"/>
-  // <vertex position="0.0 648.8 559.2" tex_coord="1 1"/>
-  // <vertex position="556.0 648.8 559.2" tex_coord="0 1"/>
+  // <vertex position="0.0 548.8 559.2" tex_coord="1 1"/>
+  // <vertex position="556.0 548.8 559.2" tex_coord="0 1"/>
   vertices.clear();
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
   int back_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "BackWallMesh");
   Material back_wall_material;
@@ -472,18 +471,18 @@ void LoadCornellBox(Scene *scene) {
   int back_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
   scene->SetEntityMaterial(back_wall_id, back_wall_material);
-  // scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+  scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
 //   scene->SetEntityAlbedoDetailTexture(back_wall_id, terrain_detail_texture_id);
   // right_wall
   // <vertex position="0.0   0.0 559.2 " tex_coord="0 0"/>
   // <vertex position = "0.0   0.0   0.0" tex_coord = "1 0" />
-  // <vertex position = "0.0 648.8   0.0" tex_coord = "1 1" />
-  // <vertex position = "0.0 648.8 559.2" tex_coord = "0 1" />
+  // <vertex position = "0.0 548.8   0.0" tex_coord = "1 1" />
+  // <vertex position = "0.0 548.8 559.2" tex_coord = "0 1" />
   vertices.clear();
   vertices.push_back(make_vertex({0.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({0.0f, 648.8f, 0.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({0.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 0.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({0.0f, 548.8f, 559.2f}, {0.0f, 1.0f}));
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
   Material right_wall_material;
@@ -495,13 +494,13 @@ void LoadCornellBox(Scene *scene) {
   // left_wall
   // <vertex position="552.8   0.0   0.0 " tex_coord="0 0"/>
   // <vertex position = "549.6   0.0 559.2" tex_coord = "1 0" />
-  // <vertex position = "556.0 648.8 559.2" tex_coord = "1 1" />
-  // <vertex position = "556.0 648.8   0.0" tex_coord = "0 1" />
+  // <vertex position = "556.0 548.8 559.2" tex_coord = "1 1" />
+  // <vertex position = "556.0 548.8   0.0" tex_coord = "0 1" />
   vertices.clear();
   vertices.push_back(make_vertex({552.8f, 0.0f, 0.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({549.6f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({556.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({556.0f, 648.8f, 0.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({556.0f, 548.8f, 0.0f}, {0.0f, 1.0f}));
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;
@@ -665,9 +664,9 @@ void LoadCornellBox(Scene *scene) {
   int tall_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "TallBoxMesh");
   Material tall_box_material;
-  tall_box_material.type = MATERIAL_TYPE_SPECULAR;
+  tall_box_material.type = MATERIAL_TYPE_RETRACTIVE;
   tall_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  tall_box_material.ior = 1.8f;
+	tall_box_material.ior = 1.4;
   int tall_box_id = scene->CreateEntity();
   scene->SetEntityMesh(tall_box_id, tall_box_mesh_id);
   scene->SetEntityMaterial(tall_box_id, tall_box_material);

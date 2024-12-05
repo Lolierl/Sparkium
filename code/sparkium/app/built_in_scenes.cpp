@@ -163,7 +163,7 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityAlbedoTexture(bread_id, bread_texture_id);
 
   Mesh spoon_mesh;
-	spoon_mesh.LoadObjFile(FindAssetsFile("mesh/Spoon/Spoon.obj"));
+	spoon_mesh.LoadObjFile(FindAssetsFile("mesh/Spoon/spoon.obj"));
   spoon_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
   //spoon_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
   //spoon_mesh.rotate(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f));

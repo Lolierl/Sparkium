@@ -129,7 +129,64 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
   
   return specular;
 }
+vec3 CalculateAnisotropicMetalBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+    // Normalize input vectors
+    vec3 N = normalize(normal_direction);
+    vec3 V = normalize(out_direction);
+    vec3 L = normalize(-in_direction);
+    
+    // Calculate the half vector
+    vec3 H = normalize(V + L);
+    
+    // Calculate the Fresnel term using Schlick's approximation
+    vec3 F0 = material.base_color;
+    vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(H, V), 5.0);
+    
+    // Calculate the geometric attenuation term
+    float NdotV = max(dot(N, V), 1e-4);
+    float NdotL = max(dot(N, L), 1e-4);
+    float NdotH = max(dot(N, H), 1e-4);
+    float VdotH = max(dot(V, H), 1e-4);
+    
+    // Anisotropic roughness
+    float alpha_x = material.roughness * (1.0 - material.anisotropic);
+    float alpha_y = material.roughness * (1.0 + material.anisotropic);
+    
+    // Anisotropic rotation
+    float rotation = material.anisotropic_rotation;
+    float cosRot = cos(rotation);
+    float sinRot = sin(rotation);
+    
+    // Transform the half-vector to account for anisotropy
+    vec3 h_tangent = vec3(
+        NdotH * cosRot - NdotH * sinRot,
+        NdotH * sinRot + NdotH * cosRot,
+        NdotH
+    );
 
+    // Anisotropic GGX normal distribution function (NDF) using alpha_x and alpha_y
+    float alpha2_x = alpha_x * alpha_x;
+    float alpha2_y = alpha_y * alpha_y;
+    float denom = (NdotH * NdotH * (alpha2_x - 1.0) + 1.0);
+    float D_x = alpha2_x / (PI * denom * denom);
+    
+    denom = (NdotH * NdotH * (alpha2_y - 1.0) + 1.0);
+    float D_y = alpha2_y / (PI * denom * denom);
+    
+    // Average the distributions in the two directions
+    float D = (D_x + D_y) / 2.0;
+    
+    // Calculate the geometric attenuation term (G)
+    float k = (material.roughness + 1.0) * (material.roughness + 1.0) / 8.0;
+    float G_V = NdotV / (NdotV * (1.0 - k) + k);
+    float G_L = NdotL / (NdotL * (1.0 - k) + k);
+    float G = G_V * G_L;
+    
+    // Combine the terms to get the final specular BRDF
+    vec3 specular = (F * G * D) / (4.0 * NdotV * NdotL);
+    
+    return specular;
+}
 vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return CalculateLambertianBRDF(material);
@@ -142,6 +199,9 @@ vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec
   }
   else if(material.type == MATERIAL_TYPE_METAL) {
     return CalculateMetalBRDF(material, in_direction, out_direction, normal_direction);
+  }
+  else if(material.type == MATERIAL_TYPE_ANISOTROPIC_METAL) {
+    return CalculateAnisotropicMetalBRDF(material, in_direction, out_direction, normal_direction);
   }
 }
 

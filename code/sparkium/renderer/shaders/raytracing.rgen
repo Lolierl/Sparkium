@@ -101,7 +101,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   vec3 hit_point, normal, base_color;
   vec3 bxdf = vec3(1.0);
   
-  float RR = 0.9; 
+  float RR = 0.1; 
   float inside = 0.0; 
   TraceRay(origin, direction);  
   /*No hit Case*/
@@ -128,10 +128,13 @@ vec3 SampleRay(vec3 origin, vec3 direction)
  
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
-    // if(RandomFloat() > RR)
-    //   break; 
-    // else
-    //   throughput /= RR;
+    if(throughput[0] < 0.2 && throughput[1] < 0.2 && throughput[2] < 0.2)
+    {
+      if(RandomFloat() <= RR)
+        break; 
+      else
+        throughput /= (1 - RR);
+    }
     bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
     
     /*1. LightSource -> entity A -> eye*/
@@ -153,7 +156,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     }
      
     /*2. Else -> entity A -> eye*/
-    SampleDirection sample_direction = SampleTransportDirection(material, direction, normal, inside); 
+    SampleDirection sample_direction = SampleTransportDirection(origin, material, direction, normal, inside); 
     vec3 new_direction = sample_direction.direction;
     bxdf = CalculateBxDF(material, direction, new_direction, normal, inside);
     if(dot(new_direction, normal) < 0)

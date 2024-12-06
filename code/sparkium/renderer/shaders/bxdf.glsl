@@ -200,7 +200,7 @@ vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec
   else if(material.type == MATERIAL_TYPE_METAL) {
     return CalculateMetalBRDF(material, in_direction, out_direction, normal_direction);
   }
-  else if(material.type == MATERIAL_TYPE_ANISOTROPIC_METAL) {
+  else if(material.type == MATERIAL_TYPE_METAL_ANISOTROPIC) {
     return CalculateAnisotropicMetalBRDF(material, in_direction, out_direction, normal_direction);
   }
 }

@@ -93,6 +93,7 @@ vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
   return direction.x * u + direction.y * v + direction.z * w;
 } 
 
+
 /*Light Sample*/
 LightSamplePoint SampleDirectLighting(vec3 origin) 
 {
@@ -298,6 +299,7 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
     // Step 1: Generate random values
     float u1 = RandomFloat(); // Random number in [0, 1]
     float u2 = RandomFloat(); // Random number in [0, 1]
+
     // Step 2: Compute anisotropic roughness in tangent space
     float alpha_x = material.roughness * (1.0 - material.anisotropic);
     float alpha_y = material.roughness * (1.0 + material.anisotropic);

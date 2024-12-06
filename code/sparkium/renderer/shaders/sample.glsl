@@ -63,7 +63,7 @@ float SampleDistance(Material material) {
 }
 
 vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
-  float g = 0.9; // Henyey-Greenstein parameter
+  float g = 0.85; // Henyey-Greenstein parameter
   float u1 = RandomFloat();
   float u2 = RandomFloat();
 
@@ -371,7 +371,7 @@ SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in
 
 vec3 SamplePhaseFunction(Material material, vec3 in_direction) {
   if (material.type == MATERIAL_TYPE_VOLUME) {
-    return in_direction;
+    return SampleHenyeyGreenstein(material, in_direction);
   }
 }
 

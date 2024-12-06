@@ -138,18 +138,32 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
     bool is_VOLUME = (material.type == MATERIAL_TYPE_VOLUME);
 
+    if(material.emission_strength > 1e-4)
+    {
+      radiance += throughput * material.emission * material.emission_strength; 
+      return radiance; 
+    } 
+
     /*1. Volumetric case*/
     if (is_VOLUME)
     {
-      TraceRay(origin + direction * 1e-4, direction);
-      if (ray_payload.t == -1.0) {
-        radiance += throughput  * EnvmapSample(direction);
-        break;
-      }  
-      hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
-      material = GetMaterial(hit_record);
-      origin = hit_record.position;
-      normal = hit_record.geometry_normal;
+      float t_max = SampleDistance(material);
+      if (ShadowRay(origin + direction * 1e-4, direction, t_max) > 1e-3)
+      {
+        TraceRay(origin + direction * 1e-4, direction);
+        if (ray_payload.t == -1.0) {
+          radiance += throughput  * EnvmapSample(direction);
+          break;
+        }  
+        hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
+        material = GetMaterial(hit_record);
+        origin = hit_record.position;
+        normal = hit_record.geometry_normal;
+        continue;
+      } 
+
+      origin = origin + direction * t_max;
+      direction = SamplePhaseFunction(material, direction);
       continue;
     }
     

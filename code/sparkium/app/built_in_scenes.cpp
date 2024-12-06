@@ -163,7 +163,7 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityAlbedoTexture(bread_id, bread_texture_id);
 
   Mesh spoon_mesh;
-	spoon_mesh.LoadObjFile(FindAssetsFile("mesh/Spoon/spoon.obj"));
+	spoon_mesh.LoadObjFile(FindAssetsFile("mesh/Spoon/Spoon.obj"));
   spoon_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
   //spoon_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
   //spoon_mesh.rotate(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -354,7 +354,7 @@ void LoadCornellBox(Scene *scene) {
 
 	// Create a sphere
 	Mesh sphere_mesh;
-	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
+	glm::vec3 sphere_position = glm::vec3(203.0f, 418.7f, 187.0f);  // Position of the sphere
 	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
 	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
 
@@ -365,7 +365,7 @@ void LoadCornellBox(Scene *scene) {
   sphere_material.anisotropic = 0;
   sphere_material.anisotropic_rotation = 0;
 	sphere_material.ior = 1.2;
-  sphere_material.alpha = 1e-6;
+  sphere_material.alpha = 3e-3;
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);

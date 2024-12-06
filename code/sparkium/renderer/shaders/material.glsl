@@ -7,6 +7,7 @@
 #define MATERIAL_TYPE_METAL_ANISOTROPIC 3
 #define MATERIAL_TYPE_ISOTROPIC_RETRACTIVE 4
 #define MATERIAL_TYPE_METAL 5
+#define MATERIAL_TYPE_VOLUME 6
 
 struct Material {
   vec3 base_color;

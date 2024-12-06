@@ -10,6 +10,7 @@ constexpr uint32_t MATERIAL_TYPE_RETRACTIVE = 2;
 constexpr uint32_t MATERIAL_TYPE_METAL_ANISOTROPIC = 3;
 constexpr uint32_t MATERIAL_TYPE_ISOTROPIC_RETRACTIVE = 4;
 constexpr uint32_t MATERIAL_TYPE_METAL = 5;
+constexpr uint32_t MATERIAL_TYPE_VOLUME = 6;
 
 // clang-format off
 struct Material {

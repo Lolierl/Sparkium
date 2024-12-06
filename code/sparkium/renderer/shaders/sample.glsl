@@ -56,6 +56,43 @@ vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
     return normalize(cross(e1, e2)); 
 }
 
+/*Volume Sample*/
+float SampleDistance(Material material) {
+  float cdf =  RandomFloat();
+  return -log(1 - cdf) / material.alpha;
+}
+
+vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
+  float g = 0.9; // Henyey-Greenstein parameter
+  float u1 = RandomFloat();
+  float u2 = RandomFloat();
+
+  float cos_theta;
+  if (abs(g) < 1e-3) {
+    cos_theta = 1.0 - 2.0 * u1;
+  } else {
+    float term = (1.0 - g * g) / (1.0 + g - 2.0 * g * u1);
+    cos_theta = (1.0 + g * g - term * term) / (2.0 * g);
+  }
+
+  float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+  float phi = 2.0 * PI * u2;
+  float cos_phi = cos(phi);
+  float sin_phi = sin(phi);
+
+  vec3 direction;
+  direction.x = sin_theta * cos_phi;
+  direction.y = sin_theta * sin_phi;
+  direction.z = cos_theta;
+
+  // Transform direction to the coordinate system of in_direction
+  vec3 w = normalize(in_direction);
+  vec3 u = normalize(cross(vec3(0.0, 1.0, 0.0), w));
+  vec3 v = cross(w, u);
+
+  return direction.x * u + direction.y * v + direction.z * w;
+} 
+
 /*Light Sample*/
 LightSamplePoint SampleDirectLighting(vec3 origin) 
 {
@@ -106,6 +143,47 @@ vec3 EnvmapSample(vec3 direction) {
          envmap_data.scale;
 }
 
+/*Shape Sample*/
+vec3 UniformSampleHemisphere(vec3 normal) 
+{
+    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
+
+    float theta = 0.5 * PI * u1; 
+    float phi = 2.0 * PI * u2;     
+
+    vec3 local_dir = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+
+    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
+    vec3 bitangent = cross(normal, tangent);
+
+    return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
+}
+
+/*Radiance Sample*/
+SamplePoint CosineSampleHemisphere(vec3 normal)
+{
+    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
+
+    float r = sqrt(u1);
+    float theta = 2.0 * PI * u2;
+
+    float x = r * cos(theta);
+    float y = r * sin(theta);
+    float z = sqrt(1.0 - u1);
+
+    vec3 local_dir = vec3(x, y, z);
+
+    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
+    vec3 bitangent = cross(normal, tangent);
+
+    SamplePoint ret;
+    ret.position = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
+    ret.position = normalize(ret.position);
+    ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
+    return ret;
+}
 /*Radiance SampleS*/
 vec3 GGXsampleMicroNormal(float alpha, vec3 N)
 {
@@ -220,7 +298,6 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
     // Step 1: Generate random values
     float u1 = RandomFloat(); // Random number in [0, 1]
     float u2 = RandomFloat(); // Random number in [0, 1]
-
     // Step 2: Compute anisotropic roughness in tangent space
     float alpha_x = material.roughness * (1.0 - material.anisotropic);
     float alpha_y = material.roughness * (1.0 + material.anisotropic);
@@ -287,6 +364,12 @@ SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in
   }
   else if (material.type == MATERIAL_TYPE_METAL_ANISOTROPIC) {
     return SampleAnisotropicMicrofacet(material, in_direction, normal_direction);
+  }
+}
+
+vec3 SamplePhaseFunction(Material material, vec3 in_direction) {
+  if (material.type == MATERIAL_TYPE_VOLUME) {
+    return in_direction;
   }
 }
 

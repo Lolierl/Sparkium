@@ -184,7 +184,7 @@ SamplePoint CosineSampleHemisphere(vec3 normal)
     ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
     return ret;
 }
-
+/*Radiance SampleS*/
 vec3 GGXsampleMicroNormal(float alpha, vec3 N)
 {
 	vec2 rand = vec2(RandomFloat(), RandomFloat());
@@ -294,10 +294,63 @@ SampleDirection SampleMetalTransportDirection(Material material, vec3 in_directi
   return ret;
 
 }
+SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction, vec3 normal) {
+    // Step 1: Generate random values
+    float u1 = RandomFloat(); // Random number in [0, 1]
+    float u2 = RandomFloat(); // Random number in [0, 1]
+    // Step 2: Compute anisotropic roughness in tangent space
+    float alpha_x = material.roughness * (1.0 - material.anisotropic);
+    float alpha_y = material.roughness * (1.0 + material.anisotropic);
 
-/*Handlers*/
-SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside) {
+    // Step 3: Anisotropic GGX sampling in tangent space
+    float phi = atan(alpha_y / alpha_x * tan(2.0 * PI * u2)); // Skewed azimuthal angle
+    if (u2 > 0.5) {
+        phi += PI;
+    }
+
+    float cosTheta = sqrt((1.0 - u1) / (1.0 + (alpha_x * alpha_y - 1.0) * u1));
+    float sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+
+    vec3 h_tangent = vec3(
+        sinTheta * cos(phi),
+        sinTheta * sin(phi),
+        cosTheta
+    );
+
+    // Step 4: Apply anisotropic rotation
+    float rotation = material.anisotropic_rotation;
+    float cosRot = cos(rotation);
+    float sinRot = sin(rotation);
+    vec3 h_rotated = vec3(
+        cosRot * h_tangent.x - sinRot * h_tangent.y,
+        sinRot * h_tangent.x + cosRot * h_tangent.y,
+        h_tangent.z
+    );
+
+    // Step 5: Transform half-vector h to world space
+    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal)); // Generate tangent vector
+    vec3 bitangent = cross(normal, tangent);
+    mat3 tbn = mat3(tangent, bitangent, normal); // TBN matrix
+    vec3 h_world = normalize(tbn * h_rotated);
+
+    // Step 6: Reflect incoming direction around the half-vector
+    vec3 outDir = ReflectionDirection(h_world, in_direction);
+
+    // Step 7: Compute the PDF
+    float dotNH = max(dot(normal, h_world), 0.0);
+    float D = 1.0 / (PI * alpha_x * alpha_y * pow(pow(dotNH, 2.0) * (alpha_x * alpha_y - 1.0) + 1.0, 2.0));
+    float pdf = D * dotNH / (4.0 * max(dot(outDir, h_world), 0.0));
+
+    // Step 8: Return result
+    SampleDirection ret;
+    ret.pdf = pdf;
+    ret.direction = normalize(outDir);
+    return ret;
+}
+SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
+    LightSamplePoint light_sample = SampleDirectLighting(origin);
+    
     return SampleLambertianTransportDirection(normal_direction);
   }
   else if (material.type == MATERIAL_TYPE_SPECULAR) {
@@ -307,8 +360,10 @@ SampleDirection SampleTransportDirection(Material material, vec3 in_direction, v
     return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside);
   }
   else if (material.type == MATERIAL_TYPE_METAL) {
-    // return SampleLambertianTransportDirection(normal_direction);
     return SampleMetalTransportDirection(material, in_direction, normal_direction);
+  }
+  else if (material.type == MATERIAL_TYPE_METAL_ANISOTROPIC) {
+    return SampleAnisotropicMicrofacet(material, in_direction, normal_direction);
   }
 }
 

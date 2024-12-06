@@ -56,6 +56,43 @@ vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
     return normalize(cross(e1, e2)); 
 }
 
+/*Volume Sample*/
+float SampleDistance(Material material) {
+  float cdf =  RandomFloat();
+  return -log(1 - cdf) / material.alpha;
+}
+
+vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
+  float g = 0.9; // Henyey-Greenstein parameter
+  float u1 = RandomFloat();
+  float u2 = RandomFloat();
+
+  float cos_theta;
+  if (abs(g) < 1e-3) {
+    cos_theta = 1.0 - 2.0 * u1;
+  } else {
+    float term = (1.0 - g * g) / (1.0 + g - 2.0 * g * u1);
+    cos_theta = (1.0 + g * g - term * term) / (2.0 * g);
+  }
+
+  float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+  float phi = 2.0 * PI * u2;
+  float cos_phi = cos(phi);
+  float sin_phi = sin(phi);
+
+  vec3 direction;
+  direction.x = sin_theta * cos_phi;
+  direction.y = sin_theta * sin_phi;
+  direction.z = cos_theta;
+
+  // Transform direction to the coordinate system of in_direction
+  vec3 w = normalize(in_direction);
+  vec3 u = normalize(cross(vec3(0.0, 1.0, 0.0), w));
+  vec3 v = cross(w, u);
+
+  return direction.x * u + direction.y * v + direction.z * w;
+} 
+
 /*Light Sample*/
 LightSamplePoint SampleDirectLighting(vec3 origin) 
 {
@@ -106,7 +143,7 @@ vec3 EnvmapSample(vec3 direction) {
          envmap_data.scale;
 }
 
-/*Shape SampleS*/
+/*Shape Sample*/
 vec3 UniformSampleHemisphere(vec3 normal) 
 {
     float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
@@ -123,7 +160,7 @@ vec3 UniformSampleHemisphere(vec3 normal)
     return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
 }
 
-/*Radiance SampleS*/
+/*Radiance Sample*/
 SamplePoint CosineSampleHemisphere(vec3 normal)
 {
     float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
@@ -258,6 +295,7 @@ SampleDirection SampleMetalTransportDirection(Material material, vec3 in_directi
 
 }
 
+/*Handlers*/
 SampleDirection SampleTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return SampleLambertianTransportDirection(normal_direction);
@@ -271,6 +309,12 @@ SampleDirection SampleTransportDirection(Material material, vec3 in_direction, v
   else if (material.type == MATERIAL_TYPE_METAL) {
     // return SampleLambertianTransportDirection(normal_direction);
     return SampleMetalTransportDirection(material, in_direction, normal_direction);
+  }
+}
+
+vec3 SamplePhaseFunction(Material material, vec3 in_direction) {
+  if (material.type == MATERIAL_TYPE_VOLUME) {
+    return in_direction;
   }
 }
 

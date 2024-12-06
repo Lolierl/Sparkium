@@ -325,6 +325,7 @@ void LoadSunFlowerDog(Scene *scene)
   scene->Camera()->SetFar(2000.0f);
   scene->Camera()->SetCameraSpeed(100.0f);
 }
+
 void LoadCornellBox(Scene *scene) {
   AssetManager *asset_manager = scene->Renderer()->AssetManager();
 
@@ -359,9 +360,10 @@ void LoadCornellBox(Scene *scene) {
 
 	Material sphere_material;
 	sphere_material.base_color = {1.000, 0.766, 0.336};
-	sphere_material.type = MATERIAL_TYPE_METAL;
+	sphere_material.type = MATERIAL_TYPE_VOLUME;
   sphere_material.roughness = 0.4; 
 	sphere_material.ior = 1.2;
+  sphere_material.alpha = 1e-6;
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);
@@ -571,11 +573,9 @@ void LoadCornellBox(Scene *scene) {
   int short_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "ShortBoxMesh");
   Material short_box_material;
-  //short_box_material.type = MATERIAL_TYPE_LAMBERTIAN; 
-  //short_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  short_box_material.type = MATERIAL_TYPE_LAMBERTIAN; 
-  short_box_material.base_color = {1.0f, 1.0f, 1.0f};
-  short_box_material.alpha = 0.1; 
+  short_box_material.type = MATERIAL_TYPE_RETRACTIVE; 
+  short_box_material.base_color = {0.8f, 0.8f, 0.8f};
+  short_box_material.ior = 1.2;
   int short_box_id = scene->CreateEntity();
   scene->SetEntityMesh(short_box_id, short_box_mesh_id);
   scene->SetEntityMaterial(short_box_id, short_box_material);

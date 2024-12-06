@@ -133,8 +133,24 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     // else
     //   throughput /= RR;
     bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
+    bool is_VOLUME = (material.type == MATERIAL_TYPE_VOLUME);
+
+    /*1. Volumetric case*/
+    if (is_VOLUME)
+    {
+      TraceRay(origin + direction * 1e-4, direction);
+      if (ray_payload.t == -1.0) {
+        radiance += throughput  * EnvmapSample(direction);
+        break;
+      }  
+      hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
+      material = GetMaterial(hit_record);
+      origin = hit_record.position;
+      normal = hit_record.geometry_normal;
+      continue;
+    }
     
-    /*1. LightSource -> entity A -> eye*/
+    /*2. LightSource -> entity A -> eye (Special Treatment for Lambertian material)*/
     if(is_LAMBERTIAN)
     {
       LightSamplePoint light_sample_point = SampleDirectLighting(origin);
@@ -152,7 +168,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       }  
     }
      
-    /*2. Else -> entity A -> eye*/
+    /*3. Else -> entity A -> eye*/
     SampleDirection sample_direction = SampleTransportDirection(material, direction, normal, inside); 
     vec3 new_direction = sample_direction.direction;
     bxdf = CalculateBxDF(material, direction, new_direction, normal, inside);
@@ -162,13 +178,13 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     throughput *= bxdf * cos_theta / sample_direction.pdf;
     TraceRay(origin + new_direction * 1e-4, new_direction);
 
-    /*2.1 Else = No hit*/ 
+    /*3.1 Else = No hit*/ 
     if (ray_payload.t == -1.0) {
       radiance += throughput  * EnvmapSample(new_direction);
       break;
     }  
 
-    /*2.2 Else = entity B. Do Recursion*/    
+    /*3.2 Else = entity B. Do Recursion*/    
     hit_record = ComposeHitRecord(ray_payload, origin + new_direction * 1e-4, new_direction);
     material = GetMaterial(hit_record);
     if(material.emission_strength < 1e-4) {

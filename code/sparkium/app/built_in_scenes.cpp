@@ -362,6 +362,8 @@ void LoadCornellBox(Scene *scene) {
 	sphere_material.base_color = {1.000, 0.766, 0.336};
 	sphere_material.type = MATERIAL_TYPE_VOLUME;
   sphere_material.roughness = 0.4; 
+  sphere_material.anisotropic = 0;
+  sphere_material.anisotropic_rotation = 0;
 	sphere_material.ior = 1.2;
   sphere_material.alpha = 1e-6;
 	int sphere_id = scene->CreateEntity();

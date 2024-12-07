@@ -304,7 +304,13 @@ int Scene::SetEntityAlbedoTexture(uint32_t entity_id, uint32_t texture_id) {
   entities_[entity_id]->metadata_.albedo_texture_id = texture_id;
   return 0;
 }
-
+int Scene::SetEntityRoughnessTexture(uint32_t entity_id, uint32_t texture_id) {
+  if (entities_.find(entity_id) == entities_.end()) {
+    return -1;
+  }
+  entities_[entity_id]->metadata_.roughness_texture_id = texture_id;
+  return 0;
+}
 int Scene::GetEntityAlbedoTexture(uint32_t entity_id,
                                   uint32_t &texture_id) const {
   if (entities_.find(entity_id) == entities_.end()) {
@@ -313,13 +319,20 @@ int Scene::GetEntityAlbedoTexture(uint32_t entity_id,
   texture_id = entities_.at(entity_id)->metadata_.albedo_texture_id;
   return 0;
 }
-
+int Scene::GetEntityRoughnessTexture(uint32_t entity_id,
+                                  uint32_t &texture_id) const {
+  if (entities_.find(entity_id) == entities_.end()) {
+    return -1;
+  }
+  texture_id = entities_.at(entity_id)->metadata_.roughness_texture_id;
+  return 0;
+}
 int Scene::SetEntityAlbedoDetailTexture(uint32_t entity_id,
                                         uint32_t texture_id) {
   if (entities_.find(entity_id) == entities_.end()) {
     return -1;
   }
-  entities_[entity_id]->metadata_.albedo_detail_texture_id = texture_id;
+  //entities_[entity_id]->metadata_.albedo_detail_texture_id = texture_id;
   return 0;
 }
 

@@ -14,9 +14,9 @@ struct HitRecord {
   vec2 tex_coord;
   vec3 omega_v;
   bool front_face;
-
   uint albedo_texture_id;
   uint albedo_detail_texture_id;
+  uint roughness_texture_id;
   vec4 detail_scale_offset;
 } hit_record;
 
@@ -35,12 +35,14 @@ HitRecord ComposeHitRecord(RayPayload ray_payload,
   hit_record.front_face = true;
   hit_record.albedo_texture_id = 0;
   hit_record.albedo_detail_texture_id = 0;
+  hit_record.roughness_texture_id = 0;
   hit_record.detail_scale_offset = vec4(1.0, 1.0, 0.0, 0.0);
 
   hit_record.entity_id = ray_payload.entity_id;
   EntityMetadata metadata = metadatas[hit_record.entity_id];
   hit_record.albedo_texture_id = metadata.albedo_texture_id;
   hit_record.albedo_detail_texture_id = metadata.albedo_detail_texture_id;
+  hit_record.roughness_texture_id = metadata.roughness_texture_id;
   hit_record.detail_scale_offset = metadata.detail_scale_offset;
   Vertex v0 = GetVertex(metadata.mesh_id,
                         index_buffers[metadata.mesh_id]

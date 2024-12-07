@@ -102,8 +102,8 @@ void LoadSunFlowerDog(Scene *scene)
 
   Material chair_material;
   //chair_material.base_color = {1.000f, 0.766f, 0.336f};
-	chair_material.type=MATERIAL_TYPE_LAMBERTIAN;
-  chair_material.roughness = 0.4;
+	chair_material.type=MATERIAL_TYPE_METAL;
+  chair_material.roughness = 1.0;
   chair_material.ior = 1.5; 
   
   Texture chair_texture;
@@ -111,13 +111,20 @@ void LoadSunFlowerDog(Scene *scene)
       FindAssetsFile("texture/chair/chair_01_Base_Color.png"),
       LDRColorSpace::UNORM);
 
+  Texture chair_roughness_texture;
+  chair_roughness_texture.LoadRoughnessTextureFromFile(
+      FindAssetsFile("texture/chair/chair_01_Roughness.png"));
+    
   auto chair_texture_id =
       asset_manager->LoadTexture(chair_texture, "ChairTexture");
+  auto chair_roughness_texture_id =
+      asset_manager->LoadTexture(chair_roughness_texture, "ChairRoughnessTexture");
+
   int chair_id = scene->CreateEntity();
   scene->SetEntityMesh(chair_id, chair_mesh_id);
   scene->SetEntityMaterial(chair_id, chair_material);
   scene->SetEntityAlbedoTexture(chair_id, chair_texture_id);
-
+  scene->SetEntityRoughnessTexture(chair_id, chair_roughness_texture_id);
   Mesh glass_mesh;
 	glass_mesh.LoadObjFile(FindAssetsFile("mesh/Glass/Glass OBJ.obj"));
 	glass_mesh.scale(40.0f);

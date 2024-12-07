@@ -49,7 +49,26 @@ int Texture::LoadFromFile(const std::string &file_path,
   stbi_image_free(pixels);
   return 0;
 }
+int Texture::LoadRoughnessTextureFromFile(const std::string &file_path) {
+  float restore_gamma = stbi__l2h_gamma;
 
+  stbi_ldr_to_hdr_gamma(1.0f); 
+
+  unsigned char *pixels = stbi_load(file_path.c_str(), reinterpret_cast<int *>(&width_),
+                                    reinterpret_cast<int *>(&height_), nullptr, 1); 
+  stbi_ldr_to_hdr_gamma(restore_gamma);
+
+  if (!pixels) {
+    return -1;
+  }
+
+  pixels_.resize(width_ * height_);
+  for (int i = 0; i < width_ * height_; i++) {
+    pixels_[i] = glm::vec4{pixels[i] / 255.0f, pixels[i] / 255.0f, pixels[i] / 255.0f, 1.0f};
+  }
+  stbi_image_free(pixels);
+  return 0;
+}
 int Texture::SaveToFile(const std::string &file_path,
                         LDRColorSpace ldr_color_space) const {
   // If ends with .hdr

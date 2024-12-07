@@ -21,6 +21,7 @@ struct SampleDirection
 struct SamplePoint
 {
   vec3 position;
+  vec3 normal;
   float pdf; 
 };
 
@@ -59,11 +60,11 @@ vec3 TriangleNormal(vec3 v0, vec3 v1, vec3 v2) {
 /*Volume Sample*/
 float SampleDistance(Material material) {
   float cdf =  RandomFloat();
-  return -log(1 - cdf) / material.alpha;
+  return -log(1 - cdf) / (material.sigma_a + material.sigma_s);
 }
 
 vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
-  float g = 0.85; // Henyey-Greenstein parameter
+  float g = material.g; // Henyey-Greenstein parameter
   float u1 = RandomFloat();
   float u2 = RandomFloat();
 
@@ -161,31 +162,31 @@ vec3 UniformSampleHemisphere(vec3 normal)
     return local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
 }
 
+// /*Radiance Sample*/
+// SamplePoint CosineSampleHemisphere(vec3 normal)
+// {
+//     float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
+//     float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
+
+//     float r = sqrt(u1);
+//     float theta = 2.0 * PI * u2;
+
+//     float x = r * cos(theta);
+//     float y = r * sin(theta);
+//     float z = sqrt(1.0 - u1);
+
+//     vec3 local_dir = vec3(x, y, z);
+
+//     vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
+//     vec3 bitangent = cross(normal, tangent);
+
+//     SamplePoint ret;
+//     ret.position = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
+//     ret.position = normalize(ret.position);
+//     ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
+//     return ret;
+// }
 /*Radiance Sample*/
-SamplePoint CosineSampleHemisphere(vec3 normal)
-{
-    float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
-    float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
-
-    float r = sqrt(u1);
-    float theta = 2.0 * PI * u2;
-
-    float x = r * cos(theta);
-    float y = r * sin(theta);
-    float z = sqrt(1.0 - u1);
-
-    vec3 local_dir = vec3(x, y, z);
-
-    vec3 tangent = normalize(cross(abs(normal.x) > 0.1 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0), normal));
-    vec3 bitangent = cross(normal, tangent);
-
-    SamplePoint ret;
-    ret.position = local_dir.x * tangent + local_dir.y * bitangent + local_dir.z * normal;
-    ret.position = normalize(ret.position);
-    ret.pdf = z / PI; // Cosine-weighted hemisphere PDF
-    return ret;
-}
-/*Radiance SampleS*/
 vec3 GGXsampleMicroNormal(float alpha, vec3 N)
 {
 	vec2 rand = vec2(RandomFloat(), RandomFloat());
@@ -349,6 +350,7 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
     ret.direction = normalize(outDir);
     return ret;
 }
+/*Handlers*/
 SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in_direction, vec3 normal_direction, float inside) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     LightSamplePoint light_sample = SampleDirectLighting(origin);
@@ -374,5 +376,36 @@ vec3 SamplePhaseFunction(Material material, vec3 in_direction) {
     return SampleHenyeyGreenstein(material, in_direction);
   }
 }
+
+// SamplePoint SampleTransportPosition(Material material, uint mesh_id, vec3 normal) {
+//   if (material.type == MATERIAL_TYPE_VOLUME) {
+//     float u = RandomFloat();
+//     int primitive_id = 0; 
+//     for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
+//       if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
+//     uint v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
+//     uint v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
+//     uint v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
+//     Vertex v0 = GetVertex(mesh_id, v0_id); 
+//     Vertex v1 = GetVertex(mesh_id, v1_id); 
+//     Vertex v2 = GetVertex(mesh_id, v2_id); 
+//     vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position);
+//     vec3 new_normal =
+//       normalize(transpose(inverse(entity_transform)) *
+//                 cross(v1.position - v0.position, v2.position - v0.position));
+//     SamplePoint ret; 
+//     ret.position = v; 
+//     float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]);
+//     ret.normal = new_normal;
+//     ret.pdf = mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
+//     return ret;
+//   } else {
+//     SamplePoint ret;
+//     ret.position = origin;
+//     ret.normal = normal;
+//     ret.pdf = 1;
+//     return ret;
+//   }
+// }
 
 #endif

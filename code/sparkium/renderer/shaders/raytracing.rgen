@@ -137,7 +137,8 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     }
     bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
     bool is_VOLUME = (material.type == MATERIAL_TYPE_VOLUME);
-
+    
+    /*Direct Illumination*/
     if(material.emission_strength > 1e-4)
     {
       radiance += throughput * material.emission * material.emission_strength; 
@@ -152,7 +153,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       {
         TraceRay(origin + direction * 1e-4, direction);
         if (ray_payload.t == -1.0) {
-          radiance += throughput  * EnvmapSample(direction);
+          radiance += throughput * EnvmapSample(direction);
           break;
         }  
         hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
@@ -160,11 +161,15 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         origin = hit_record.position;
         normal = hit_record.geometry_normal;
         continue;
-      } 
-
-      origin = origin + direction * t_max;
-      direction = SamplePhaseFunction(material, direction);
-      continue;
+      }
+      if(RandomFloat() <= material.sigma_a / (material.sigma_a + material.sigma_s)) {
+        radiance += throughput * material.volume_emission_strength * material.emission;
+        return radiance;
+      } else {
+        origin = origin + direction * t_max;
+        direction = SamplePhaseFunction(material, direction);
+        continue;
+      }
     }
     
     /*2. LightSource -> entity A -> eye (Special Treatment for Lambertian material)*/

@@ -37,6 +37,11 @@ struct Material {
   vec3 emission;
   float alpha;
 
+  float sigma_a;
+  float sigma_s;
+  float g;
+  float volume_emission_strength;
+
   vec3 normal;
   uint type;
 };

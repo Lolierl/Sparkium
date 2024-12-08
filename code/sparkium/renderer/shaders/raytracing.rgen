@@ -101,7 +101,7 @@ Material GetMaterial(HitRecord hit_record) {
     tangent_normal = normalize(tangent_normal);  
     mat3 TBN = mat3(hit_record.tangent, hit_record.bitangent, hit_record.shading_normal);
     material.normal = normalize(TBN * tangent_normal);
-  }
+  } 
   return material;
 } 
 

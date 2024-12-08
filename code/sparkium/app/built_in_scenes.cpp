@@ -41,7 +41,7 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadMesh(Mesh(vertices, indices), "LightMesh");
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
-  light_material.emission = {1.0f, 1.0f, 0.6f};
+  light_material.emission = {1.0f, 1.0f, 1.0f};
   light_material.emission_strength = 30.0f;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);

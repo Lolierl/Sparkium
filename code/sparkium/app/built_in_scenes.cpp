@@ -114,17 +114,24 @@ void LoadSunFlowerDog(Scene *scene)
   Texture chair_roughness_texture;
   chair_roughness_texture.LoadRoughnessTextureFromFile(
       FindAssetsFile("texture/chair/chair_01_Roughness.png"));
+
+  Texture chair_normal_texture;
+  chair_normal_texture.LoadNormalTextureFromFile(
+      FindAssetsFile("texture/chair/chair_01_Normal_DirectX.png"));
     
   auto chair_texture_id =
       asset_manager->LoadTexture(chair_texture, "ChairTexture");
   auto chair_roughness_texture_id =
       asset_manager->LoadTexture(chair_roughness_texture, "ChairRoughnessTexture");
+  auto chair_normal_texture_id =
+      asset_manager->LoadTexture(chair_normal_texture, "ChairNormalTexture");
 
   int chair_id = scene->CreateEntity();
   scene->SetEntityMesh(chair_id, chair_mesh_id);
   scene->SetEntityMaterial(chair_id, chair_material);
   scene->SetEntityAlbedoTexture(chair_id, chair_texture_id);
   scene->SetEntityRoughnessTexture(chair_id, chair_roughness_texture_id);
+  scene->SetEntityNormalTexture(chair_id, chair_normal_texture_id);
   Mesh glass_mesh;
 	glass_mesh.LoadObjFile(FindAssetsFile("mesh/Glass/Glass OBJ.obj"));
 	glass_mesh.scale(40.0f);

@@ -8,7 +8,13 @@
 #define MATERIAL_TYPE_ISOTROPIC_RETRACTIVE 4
 #define MATERIAL_TYPE_METAL 5
 #define MATERIAL_TYPE_VOLUME 6
-#define LIGHTSOURCE_TYPE_SUN 100
+
+#define SPECTRUM_TYPE_D65 100
+#define SPECTRUM_TYPE_D75 101
+#define SPECTRUM_TYPE_D50 102
+#define SPECTRUM_TYPE_SODIUM 103
+
+#define ILLUMINANT_TYPE_LAMBERTIAN 200
 
 struct Material {
   vec3 base_color;
@@ -46,8 +52,11 @@ struct Material {
   float a;
   float b;
   float c;
-  float d;
+  uint spectrum_type;
 
+  vec3 illuminant_dir;
+  uint illuminant_type;
+  
   vec3 normal;
   uint type;
 };

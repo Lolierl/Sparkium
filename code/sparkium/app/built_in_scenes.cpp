@@ -43,6 +43,8 @@ void LoadSunFlowerDog(Scene *scene)
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 0.6f};
   light_material.emission_strength = 30.0f;
+  light_material.spectrum_type = SPECTRUM_TYPE_SODIUM;
+  light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);
@@ -343,21 +345,22 @@ void LoadCornellBox(Scene *scene) {
     return vertex;
   };
 
-	// Create a pointlight
+	// // Create a pointlight
 
-	Mesh light_sphere_mesh;
-  glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
-  light_sphere_mesh.CreateSphere(light_sphere_position, 1.0f, 4, 4);  // Small sphere with radius 10
-  int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
+	// Mesh light_sphere_mesh;
+  // glm::vec3 light_sphere_position = glm::vec3(20.0f, 20.0f, 20.0f);  // Position of the light sphere
+  // light_sphere_mesh.CreateSphere(light_sphere_position, 10.0f, 4, 4);  // Small sphere with radius 10
+  // int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
 
-  Material light_sphere_material;
-  light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
-  light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
-  light_sphere_material.emission_strength = 1000.0f;  // Adjust the strength as needed
-  light_sphere_material.type = MATERIAL_TYPE_LAMBERTIAN;
-  int light_sphere_id = scene->CreateEntity();
-  scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
-  scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
+  // Material light_sphere_material;
+  // light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
+  // light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
+  // light_sphere_material.emission_strength = 50.0f;  // Adjust the strength as needed
+  // light_sphere_material.spectrum_type = SPECTRUM_TYPE_D75;
+  // light_sphere_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
+  // int light_sphere_id = scene->CreateEntity();
+  // scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
+  // scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
 
 	// Create a sphere
 	Mesh sphere_mesh;
@@ -367,7 +370,7 @@ void LoadCornellBox(Scene *scene) {
 
 	Material sphere_material;
 	sphere_material.base_color = {1.000, 0.766, 0.336};
-	sphere_material.type = MATERIAL_TYPE_RETRACTIVE;
+	sphere_material.type = MATERIAL_TYPE_METAL;
   sphere_material.roughness = 0.4; 
   sphere_material.anisotropic = 0;
   sphere_material.anisotropic_rotation = 0;
@@ -414,7 +417,9 @@ void LoadCornellBox(Scene *scene) {
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 1.0f};
-  light_material.emission_strength = 100.0f;
+  light_material.emission_strength = 30.0f;
+  light_material.spectrum_type = SPECTRUM_TYPE_D75;
+  light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);

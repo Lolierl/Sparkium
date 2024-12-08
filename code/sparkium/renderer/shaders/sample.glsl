@@ -5,13 +5,6 @@
 #include "bxdf.glsl"
 
 /*All Sample Point Struct*/
-struct LightSamplePoint
-{
-  vec3 position; 
-  uint mesh_id, primitive_id; 
-  float pdf; 
-};
-
 struct SampleDirection
 {
   vec3 direction;
@@ -93,77 +86,6 @@ vec3 SampleHenyeyGreenstein(Material material, vec3 in_direction) {
 
   return direction.x * u + direction.y * v + direction.z * w;
 } 
-
-
-/*Light Sample*/
-LightSamplePoint SampleDirectLighting(vec3 origin) 
-{
-  float u = RandomFloat();
-  uint entity_id = 0; 
-  for(; entity_id < scene_settings.num_entity; entity_id++)
-    if(metadatas[entity_id].emission_cdf > u)break; 
-
-  float entity_pdf = metadatas[entity_id].emission_cdf - ((entity_id == 0) ? 0 : metadatas[entity_id - 1].emission_cdf); 
-  Material material = materials[entity_id]; 
-  uint mesh_id = metadatas[entity_id].mesh_id; 
-  
-  u = RandomFloat();
-  int primitive_id = 0; 
-  for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
-    if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
-  uint v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
-  uint v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
-  uint v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
-  Vertex v0 = GetVertex(mesh_id, v0_id); 
-  Vertex v1 = GetVertex(mesh_id, v1_id); 
-  Vertex v2 = GetVertex(mesh_id, v2_id); 
-  vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position); 
-  LightSamplePoint ret; 
-  ret.position = v; 
-  ret.mesh_id = mesh_id; 
-  ret.primitive_id = primitive_id; 
-
-  float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
-  ret.pdf = entity_pdf * mesh_pdf / TriangleArea(v0.position, v1.position, v2.position); 
-  return ret; 
-}
-
-float SampleWavelength() {
-  const float wavelengths[81] = float[](
-    380.0, 385.0, 390.0, 395.0, 400.0, 405.0, 410.0, 415.0, 420.0, 425.0,
-    430.0, 435.0, 440.0, 445.0, 450.0, 455.0, 460.0, 465.0, 470.0, 475.0,
-    480.0, 485.0, 490.0, 495.0, 500.0, 505.0, 510.0, 515.0, 520.0, 525.0,
-    530.0, 535.0, 540.0, 545.0, 550.0, 555.0, 560.0, 565.0, 570.0, 575.0,
-    580.0, 585.0, 590.0, 595.0, 600.0, 605.0, 610.0, 615.0, 620.0, 625.0,
-    630.0, 635.0, 640.0, 645.0, 650.0, 655.0, 660.0, 665.0, 670.0, 675.0,
-    680.0, 685.0, 690.0, 695.0, 700.0, 705.0, 710.0, 715.0, 720.0, 725.0,
-    730.0, 735.0, 740.0, 745.0, 750.0, 755.0, 760.0, 765.0, 770.0, 775.0,
-    780.0
-  );
-  const float D65_spectrum[81] = float[](
-    0.000174, 0.000244, 0.000339, 0.000464, 0.000634, 0.000854, 0.001133, 0.001478, 0.001896, 0.002393,
-    0.002973, 0.003638, 0.004391, 0.005237, 0.006182, 0.007234, 0.008394, 0.009676, 0.011083, 0.012616,
-    0.014276, 0.016070, 0.018000, 0.020066, 0.022259, 0.024572, 0.027000, 0.029538, 0.032177, 0.034924,
-    0.037775, 0.040730, 0.043785, 0.046933, 0.050171, 0.053493, 0.056890, 0.060355, 0.063881, 0.067457,
-    0.071078, 0.074731, 0.078406, 0.082090, 0.085774, 0.089444, 0.093085, 0.096682, 0.100220, 0.103685,
-    0.107070, 0.110359, 0.113554, 0.116653, 0.119653, 0.122552, 0.125347, 0.128037, 0.130621, 0.133097,
-    0.135463, 0.137718, 0.139859, 0.141884, 0.143792, 0.145581, 0.147250, 0.148796, 0.150219, 0.151516,
-    0.152687, 0.153731, 0.154646, 0.155430, 0.156080, 0.156597, 0.157000, 0.157286, 0.157436, 0.157426,
-    0.157222
-  );
-  // Generate a random number between 0 and 1
-  float rand = RandomFloat() * 0.157222;
-
-  // Find the wavelength corresponding to the random number
-  for (int i = 0; i < 81; ++i) {
-    if (rand <= D65_spectrum[i]) {
-      return wavelengths[i];
-    }
-  }
-
-  // Fallback in case of numerical issues
-  return wavelengths[80];
-}
 
 /*Texture Sample*/
 vec4 SampleTextureLinear(uint texture_id, vec2 uv) {
@@ -272,12 +194,12 @@ SampleDirection SampleSpecularTransportDirection(vec3 in_direction, vec3 normal_
   ret.direction = ReflectionDirection(normal_direction, in_direction);
   return ret;
 }
-SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal, float inside, float wavelength) {
+SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal, float inside, float wave_length) {
   SampleDirection ret; 
   ret.pdf = 1;
 
   vec3 reflection_direction = ReflectionDirection(normal, in_direction); 
-  float n = material.a + material.b / pow(wavelength, 2.0) + material.c / pow(wavelength, 4.0);
+  float n = material.a + material.b / pow(wave_length, 2.0) + material.c / pow(wave_length, 4.0);
   float etap = (inside < 1e-3) ? n : 1.0 / n;
   vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
   float ratio = FresnelReflectionRate(in_direction, normal, etap); 
@@ -388,18 +310,49 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
     ret.direction = normalize(outDir);
     return ret;
 }
+
+// /*LighSource Sample*/
+// SampleDirection SampleDirectLighting(vec3 origin) 
+// {
+//   float u = RandomFloat();
+//   uint entity_id = 0; 
+//   for(; entity_id < scene_settings.num_entity; entity_id++)
+//     if(metadatas[entity_id].emission_cdf > u)break; 
+
+//   uint mesh_id = metadatas[entity_id].mesh_id; 
+  
+//   u = RandomFloat();
+//   int primitive_id = 0; 
+//   for(; primitive_id < mesh_metadatas[mesh_id].num_index / 3; primitive_id++)
+//     if(mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] > u)break; 
+//   uint v0_id = index_buffers[mesh_id].indices[primitive_id * 3 + 0]; 
+//   uint v1_id = index_buffers[mesh_id].indices[primitive_id * 3 + 1]; 
+//   uint v2_id = index_buffers[mesh_id].indices[primitive_id * 3 + 2]; 
+//   Vertex v0 = GetVertex(mesh_id, v0_id); 
+//   Vertex v1 = GetVertex(mesh_id, v1_id); 
+//   Vertex v2 = GetVertex(mesh_id, v2_id); 
+//   vec3 v = UniformSampleTriangle(v0.position, v1.position, v2.position); 
+//   SampleDirection ret; 
+//   ret.direction = normalize(v - origin); 
+//   float r = distance(v, origin);
+//   float normal = normalize(cross(v1.position - v0.position, v2.position - v0.position));
+
+//   float mesh_pdf = mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id] - ((primitive_id == 0) ? 0 : mesh_cdf_buffers[mesh_id].area_cdfs[primitive_id - 1]); 
+//   ret.pdf = mesh_pdf / TriangleArea(v0.position, v1.position, v2.position) * ; 
+//   return ret; 
+// }
+
+
 /*Handlers*/
-SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in_direction, vec3 normal_direction, float inside, float wavelength) {
-  if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
-    LightSamplePoint light_sample = SampleDirectLighting(origin);
-    
+SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in_direction, vec3 normal_direction, float inside, float wave_length) {
+  if (material.type == MATERIAL_TYPE_LAMBERTIAN) {    
     return SampleLambertianTransportDirection(normal_direction);
   }
   else if (material.type == MATERIAL_TYPE_SPECULAR) {
     return SampleSpecularTransportDirection(in_direction, normal_direction);
   }
   else if (material.type == MATERIAL_TYPE_RETRACTIVE) {
-    return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside, wavelength);
+    return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside, wave_length);
   }
   else if (material.type == MATERIAL_TYPE_METAL) {
     return SampleMetalTransportDirection(material, in_direction, normal_direction);

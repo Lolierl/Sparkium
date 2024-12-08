@@ -12,6 +12,13 @@ constexpr uint32_t MATERIAL_TYPE_ISOTROPIC_RETRACTIVE = 4;
 constexpr uint32_t MATERIAL_TYPE_METAL = 5;
 constexpr uint32_t MATERIAL_TYPE_VOLUME = 6;
 
+constexpr uint32_t SPECTRUM_TYPE_D65 = 100;
+constexpr uint32_t SPECTRUM_TYPE_D75 = 101;
+constexpr uint32_t SPECTRUM_TYPE_D50 = 102;
+constexpr uint32_t SPECTRUM_TYPE_SODIUM = 103;
+
+constexpr uint32_t ILLUMINANT_TYPE_LAMBERTIAN = 200;
+
 // clang-format off
 struct Material {
   glm::vec3 base_color{1.0f};
@@ -49,7 +56,11 @@ struct Material {
   float a{ior};
   float b{0.0f};
   float c{0.0f};
-  float d{0.0f};
+  
+  uint32_t spectrum_type{0};
+
+  glm::vec3 illuminant_dir{0.5f, 0.5f, 1.0f};
+  uint32_t illuminant_type{0};
 
   glm::vec3 normal{0.5f, 0.5f, 1.0f};
   uint32_t type{0};

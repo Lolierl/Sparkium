@@ -8,7 +8,7 @@ const float LEN_MIN = 380.0;
 const float LEN_MAX = 780.0;
 const float LEN_STEP = 5.0;
 
-// Precomputed X, Y, Z values for the wavelength range
+// Precomputed X, Y, Z values for the wave_length range
 const int TABLE_SIZE = 81;
 const float X[TABLE_SIZE] = float[](
     0.000160, 0.000662, 0.002362, 0.007242, 0.019110, 0.043400, 0.084736, 0.140638, 0.204492, 0.264737,
@@ -48,9 +48,9 @@ const float Z[TABLE_SIZE] = float[](
 
 // SRGB D65 conversion matrix
 const mat3 MATRIX_SRGB_D65 = mat3(
-    3.2404542, -1.5371385, -0.4985314,
-    -0.9692660,  1.8760108,  0.0415560,
-    0.0556434, -0.2040259,  1.0572252
+    3.2404542, -0.9692660,  0.0556434,
+   -1.5371385,  1.8760108, -0.2040259,
+   -0.4985314,  0.0415560,  1.0572252
 );
 
 float interpolate(const float values[TABLE_SIZE], int index, float offset) {
@@ -66,12 +66,12 @@ vec3 clip(vec3 c) {
     return clamp(c, 0.0, 1.0);
 }
 
-vec3 wavelengthToRGB(float wavelength) {
-    if (wavelength < LEN_MIN || wavelength > LEN_MAX) {
+vec3 WaveLengthToRGB(float wave_length) {
+    if (wave_length < LEN_MIN || wave_length > LEN_MAX) {
         return vec3(0.0);
     }
     
-    float scaled = (wavelength - LEN_MIN) / LEN_STEP;
+    float scaled = (wave_length - LEN_MIN) / LEN_STEP;
     int index = int(floor(scaled));
     float offset = scaled - float(index);
     

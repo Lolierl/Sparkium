@@ -11,6 +11,8 @@ constexpr uint32_t MATERIAL_TYPE_METAL_ANISOTROPIC = 3;
 constexpr uint32_t MATERIAL_TYPE_ISOTROPIC_RETRACTIVE = 4;
 constexpr uint32_t MATERIAL_TYPE_METAL = 5;
 constexpr uint32_t MATERIAL_TYPE_VOLUME = 6;
+constexpr uint32_t MATERIAL_TYPE_MULTILAYER = 7;
+constexpr uint32_t MATERIAL_TYPE_NONMETAL = 8;
 
 constexpr uint32_t SPECTRUM_TYPE_D65 = 100;
 constexpr uint32_t SPECTRUM_TYPE_D75 = 101;

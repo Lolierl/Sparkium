@@ -52,9 +52,20 @@ float Shadow_term(vec3 in_direction, vec3 out_direction, vec3 normal_direction, 
   float shadow = g1*g2;
   return shadow;
 }
-
-vec3 CalculateLambertianBRDF(Material material) {
+float lum(vec3 color) {
+    return 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+}
+vec3 CalculateLambertianBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
   return material.base_color * INV_PI;
+}
+vec3 CalculateNonMetalBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
+  vec3 h = normalize(-in_direction + out_direction);
+  float cosThetaI = max(dot(normal_direction, -in_direction), 0.0);
+  float cosThetaO = max(dot(normal_direction, out_direction), 0.0);
+  float cosThetaH = max(dot(-in_direction, h), 0.0);
+  float FD90 = 0.5 + 2.0 * cosThetaH * cosThetaH * material.roughness;
+  return material.base_color * INV_PI * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaI, 5.0)) * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaO, 5.0))
+         + mix(vec3(1.0), material.base_color / lum(material.base_color), material.sheen_tint) * material.sheen * pow(1.0 - cosThetaH, 5.0); 
 }
 
 vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
@@ -190,7 +201,7 @@ vec3 CalculateAnisotropicMetalBRDF(Material material, vec3 in_direction, vec3 ou
 }
 vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside, float wave_length) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
-    return CalculateLambertianBRDF(material);
+    return CalculateLambertianBRDF(material, in_direction, out_direction, normal_direction);
   }
   else if (material.type == MATERIAL_TYPE_SPECULAR) {
     return CalculateSpecularBRDF(material, in_direction, out_direction, normal_direction);
@@ -204,6 +215,13 @@ vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec
   else if(material.type == MATERIAL_TYPE_METAL_ANISOTROPIC) {
     return CalculateAnisotropicMetalBRDF(material, in_direction, out_direction, normal_direction);
   }
+  else if(material.type == MATERIAL_TYPE_NONMETAL) {
+    return CalculateNonMetalBRDF(material, in_direction, out_direction, normal_direction);
+  }
+  /*else if(material.type == MATERIAL_TYPE_METAL_MULTILAYER) {
+    return CalculateMultilayerBRDF(material, in_direction, out_direction, normal_direction);
+  }*/
+
 }
 
 #endif

@@ -8,6 +8,7 @@
 #define MATERIAL_TYPE_ISOTROPIC_RETRACTIVE 4
 #define MATERIAL_TYPE_METAL 5
 #define MATERIAL_TYPE_VOLUME 6
+#define LIGHTSOURCE_TYPE_SUN 100
 
 struct Material {
   vec3 base_color;
@@ -41,6 +42,11 @@ struct Material {
   float sigma_s;
   float g;
   float volume_emission_strength;
+
+  float a;
+  float b;
+  float c;
+  float d;
 
   vec3 normal;
   uint type;

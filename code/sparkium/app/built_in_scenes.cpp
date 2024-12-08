@@ -361,17 +361,19 @@ void LoadCornellBox(Scene *scene) {
 
 	// Create a sphere
 	Mesh sphere_mesh;
-	glm::vec3 sphere_position = glm::vec3(203.0f, 318.7f, 187.0f);  // Position of the sphere
-	sphere_mesh.CreateSphere(sphere_position, 200.0f, 16, 16);
+	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
+	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
 	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
 
 	Material sphere_material;
 	sphere_material.base_color = {1.000, 0.766, 0.336};
-	sphere_material.type = MATERIAL_TYPE_VOLUME;
+	sphere_material.type = MATERIAL_TYPE_RETRACTIVE;
   sphere_material.roughness = 0.4; 
   sphere_material.anisotropic = 0;
   sphere_material.anisotropic_rotation = 0;
-	sphere_material.ior = 1.2;
+  sphere_material.a = 1.5046;
+  sphere_material.b = 4200;
+  sphere_material.c = 7650;
   sphere_material.sigma_a = 1e-2 * 0.2;
   sphere_material.sigma_s = 1e-2 * 0.8;
   sphere_material.emission = {0.8, 0.2, 0.1};
@@ -412,7 +414,7 @@ void LoadCornellBox(Scene *scene) {
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 1.0f};
-  light_material.emission_strength = 30.0f;
+  light_material.emission_strength = 100.0f;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);
@@ -500,7 +502,7 @@ void LoadCornellBox(Scene *scene) {
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
   Material right_wall_material;
-  right_wall_material.base_color = {0.0, 0.8, 0.0};
+  right_wall_material.base_color = {0.0, 1.0, 0.0};
   int right_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(right_wall_id, right_wall_mesh_id);
   scene->SetEntityMaterial(right_wall_id, right_wall_material);
@@ -518,7 +520,7 @@ void LoadCornellBox(Scene *scene) {
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;
-  left_wall_material.base_color = {0.8f, 0.0f, 0.0f};
+  left_wall_material.base_color = {1.0f, 0.0f, 0.0f};
   int left_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
@@ -587,7 +589,9 @@ void LoadCornellBox(Scene *scene) {
   Material short_box_material;
   short_box_material.type = MATERIAL_TYPE_RETRACTIVE; 
   short_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  short_box_material.ior = 1.2;
+  short_box_material.a = 1.5046;
+  short_box_material.b = 4200;
+  short_box_material.c = 7650;
   int short_box_id = scene->CreateEntity();
   scene->SetEntityMesh(short_box_id, short_box_mesh_id);
   scene->SetEntityMaterial(short_box_id, short_box_material);
@@ -678,7 +682,9 @@ void LoadCornellBox(Scene *scene) {
   Material tall_box_material;
   tall_box_material.type = MATERIAL_TYPE_RETRACTIVE;
   tall_box_material.base_color = {0.8f, 0.8f, 0.8f};
-	tall_box_material.ior = 1.4;
+  tall_box_material.a = 1.5046;
+  tall_box_material.b = 4200;
+  tall_box_material.c = 7650;
   int tall_box_id = scene->CreateEntity();
   scene->SetEntityMesh(tall_box_id, tall_box_mesh_id);
   scene->SetEntityMaterial(tall_box_id, tall_box_material);

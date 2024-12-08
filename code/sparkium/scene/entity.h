@@ -10,10 +10,10 @@ struct EntityMetadata {
   uint32_t mesh_id{0};
   uint32_t albedo_texture_id{0};
   uint32_t roughness_texture_id{0}; 
+  uint32_t normal_texture_id{0};
   uint32_t albedo_detail_texture_id{0};
   float emission_cdf{0.0f};
   float padding0;  // padding to 16 bytes
-  float padding1;  // padding to 16 bytes
   glm::vec4 detail_scale_offset{10.0f, 10.0f, 0.0f, 0.0f};
   // This structure needs to be padded to 16 bytes
   // If you wants to add normal_texture_id, you should add it here.

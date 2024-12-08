@@ -88,9 +88,13 @@ class Scene {
 
   int SetEntityRoughnessTexture(uint32_t entity_id, uint32_t texture_id); 
 
+  int SetEntityNormalTexture(uint32_t entity_id, uint32_t texture_id);
+
   int GetEntityAlbedoTexture(uint32_t entity_id, uint32_t &texture_id) const;
 
   int GetEntityRoughnessTexture(uint32_t entity_id, uint32_t &texture_id) const;
+
+  int GetEntityNormalTexture(uint32_t entity_id, uint32_t &texture_id) const;
 
   int SetEntityAlbedoDetailTexture(uint32_t entity_id, uint32_t texture_id);
 

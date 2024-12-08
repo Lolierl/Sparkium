@@ -26,6 +26,7 @@ class Texture {
   int LoadFromFile(const std::string &file_path,
                    LDRColorSpace ldr_color_space = LDRColorSpace::SRGB);
   int LoadRoughnessTextureFromFile(const std::string &file_path); 
+  int LoadNormalTextureFromFile(const std::string &file_path); 
   
   int SaveToFile(const std::string &file_path,
                  LDRColorSpace ldr_color_space = LDRColorSpace::SRGB) const;

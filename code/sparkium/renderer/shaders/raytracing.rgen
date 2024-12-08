@@ -144,7 +144,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   material = GetMaterial(hit_record);
   normal = hit_record.geometry_normal;
   origin = hit_record.position; 
-  if(material.emission_strength > 1e-4) {
+  if(material.emission_strength > 1e-4 && material.type != MATERIAL_TYPE_VOLUME) {
     float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
     radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
     return radiance; 
@@ -164,11 +164,11 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       else
         throughput /= (1 - RR);
     }
-    bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
+    bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN);  
     bool is_VOLUME = (material.type == MATERIAL_TYPE_VOLUME);
     
     /*Direct Illumination*/
-    if(material.emission_strength > 1e-4)
+    if(material.emission_strength > 1e-4 && material.type != MATERIAL_TYPE_VOLUME)
     {
       float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
       radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
@@ -178,22 +178,28 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     /*1. Volumetric case*/
     if (is_VOLUME)
     {
+      TraceRay(origin + direction * 1e-4, direction);
+      if (ray_payload.t == -1.0) {
+        radiance += throughput * EnvmapSample(direction);
+        break;
+      }  
+      hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
+      material = GetMaterial(hit_record);
+      if (material.type != MATERIAL_TYPE_VOLUME) {
+        origin = hit_record.position;
+        normal = material.normal;
+        continue;
+      }
       float t_max = SampleDistance(material);
-      if (ShadowRay(origin + direction * 1e-4, direction, t_max) > 1e-3)
+      if (ShadowRay(origin + direction * 1e-4, direction, t_max) < 1e-3)
       {
-        TraceRay(origin + direction * 1e-4, direction);
-        if (ray_payload.t == -1.0) {
-          radiance += throughput * EnvmapSample(direction);
-          break;
-        }  
-        hit_record = ComposeHitRecord(ray_payload, origin + direction * 1e-4, direction);
-        material = GetMaterial(hit_record);
         origin = hit_record.position;
         normal = material.normal;
         continue;
       }
       if(RandomFloat() <= material.sigma_a / (material.sigma_a + material.sigma_s)) {
-        radiance += throughput * material.volume_emission_strength * material.emission;
+        float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
+        radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
         return radiance;
       } else {
         origin = origin + direction * t_max;
@@ -240,15 +246,15 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     /*3.2 Else = entity B. Do Recursion*/    
     hit_record = ComposeHitRecord(ray_payload, origin + new_direction * 1e-4, new_direction);
     material = GetMaterial(hit_record);
-    if(material.emission_strength < 1e-4) {
-      origin = hit_record.position;
-      direction = new_direction; 
-      normal = material.normal; 
-    } else 
-    {
+    if(material.emission_strength > 1e-4 && material.type != MATERIAL_TYPE_VOLUME) {
       float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
       radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
       break; 
+    } else 
+    {
+      origin = hit_record.position;
+      direction = new_direction; 
+      normal = material.normal; 
     }
   }
   return radiance;

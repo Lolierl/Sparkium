@@ -45,7 +45,7 @@ float CalculateLightStrength(Material material, vec3 origin, vec3 direction, vec
 		spectrum_coeff = (i == 0) ? D65_spectrum[i] : (D65_spectrum[i] - D65_spectrum[i-1]);
 		spectrum_coeff /= D65_spectrum[80];
 	}
-	else if (material.spectrum_type == SPECTRUM_TYPE_D75)  {
+	else if (material.spectrum_type == SPECTRUM_TYPE_D75) {
 		uint i = (int(wave_length) - 380) / 5;
 		spectrum_coeff = (i == 0) ? D75_spectrum[i] : (D75_spectrum[i] - D75_spectrum[i-1]);
 		spectrum_coeff /= D75_spectrum[80];
@@ -60,7 +60,11 @@ float CalculateLightStrength(Material material, vec3 origin, vec3 direction, vec
 		spectrum_coeff = (i == 0) ? sodium_spectrum[i] : (sodium_spectrum[i] - sodium_spectrum[i-1]);
 		spectrum_coeff /= sodium_spectrum[80];
 	}
+
 	if (material.illuminant_type == ILLUMINANT_TYPE_LAMBERTIAN) {
+		geometry_coeff = 1.0;
+	}
+	else if (material.type == MATERIAL_TYPE_VOLUME) {
 		geometry_coeff = 1.0;
 	}
 	return geometry_coeff * spectrum_coeff * material.emission_strength;

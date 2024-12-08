@@ -377,17 +377,17 @@ void LoadCornellBox(Scene *scene) {
 
 	Material sphere_material;
 	sphere_material.base_color = {1.000, 0.766, 0.336};
-	sphere_material.type = MATERIAL_TYPE_METAL;
+	sphere_material.type = MATERIAL_TYPE_VOLUME;
   sphere_material.roughness = 0.4; 
   sphere_material.anisotropic = 0;
   sphere_material.anisotropic_rotation = 0;
   sphere_material.a = 1.5046;
   sphere_material.b = 4200;
   sphere_material.c = 7650;
-  sphere_material.sigma_a = 1e-2 * 0.2;
-  sphere_material.sigma_s = 1e-2 * 0.8;
-  sphere_material.emission = {0.8, 0.2, 0.1};
-  sphere_material.volume_emission_strength = 10.0f;
+  sphere_material.sigma_a = 3e-3 * 0.2;
+  sphere_material.sigma_s = 3e-3 * 0.8;
+  sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
+  sphere_material.emission_strength = 1.0f;
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);

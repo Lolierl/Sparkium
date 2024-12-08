@@ -41,6 +41,16 @@ struct Material {
   glm::vec3 emission{1.0f};
   float alpha{1.0f};
 
+  float sigma_a{0.0f};
+  float sigma_s{0.0f};
+  float g{0.0f};
+  float volume_emission_strength{0.0f};
+
+  float a{ior};
+  float b{0.0f};
+  float c{0.0f};
+  float d{0.0f};
+
   glm::vec3 normal{0.5f, 0.5f, 1.0f};
   uint32_t type{0};
 

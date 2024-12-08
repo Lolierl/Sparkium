@@ -360,6 +360,9 @@ SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in
   else if (material.type == MATERIAL_TYPE_METAL_ANISOTROPIC) {
     return SampleAnisotropicMicrofacet(material, in_direction, normal_direction);
   }
+  else if (material.type == MATERIAL_TYPE_NONMETAL) {
+    return SampleLambertianTransportDirection(normal_direction);
+  }
 }
 
 vec3 SamplePhaseFunction(Material material, vec3 in_direction) {

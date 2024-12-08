@@ -104,9 +104,10 @@ void LoadSunFlowerDog(Scene *scene)
 
   Material chair_material;
   //chair_material.base_color = {1.000f, 0.766f, 0.336f};
-	chair_material.type=MATERIAL_TYPE_METAL;
+	chair_material.type=MATERIAL_TYPE_NONMETAL; 
   chair_material.roughness = 1.0;
-  chair_material.ior = 1.5; 
+  chair_material.sheen = 1.0; 
+  chair_material.sheen_tint = 0.5;
   
   Texture chair_texture;
   chair_texture.LoadFromFile(

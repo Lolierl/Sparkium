@@ -143,10 +143,14 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
 }
 vec3 CalculateMultilayerBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
   Material new_material = material;
+  Material specular_material = material;
+
   new_material.roughness = material.clearcoat_roughness;
   new_material.base_color = vec3(0.04);
+  specular_material.base_color = mix(0.08 * material.specular * mix(vec3(1.0), material.base_color / lum(material.base_color), material.specular_tint), material.base_color, material.metallic);
   return CalculateNonMetalBRDF(material, in_direction, out_direction, normal_direction)
-   + material.clearcoat * CalculateMetalBRDF(new_material, in_direction, out_direction, normal_direction);
+  + CalculateMetalBRDF(specular_material, in_direction, out_direction, normal_direction)
+  + material.clearcoat * CalculateMetalBRDF(new_material, in_direction, out_direction, normal_direction);
 }
 vec3 CalculateAnisotropicMetalBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
     // Normalize input vectors

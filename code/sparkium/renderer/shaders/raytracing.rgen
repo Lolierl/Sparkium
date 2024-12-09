@@ -217,7 +217,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       if(dot(normal, new_direction) < 0)break; 
       bxdf = CalculateBxDF(material, new_direction, direction, normal, inside);
       if(ShadowRay(origin + new_direction * 1e-4, new_direction, r) > 1e-3)
-      {
+      {  
         TraceRay(origin + new_direction * 1e-4, new_direction);  
         hit_record = ComposeHitRecord(ray_payload, origin + new_direction * 1e-4, new_direction);
         Material light_material = GetMaterial(hit_record);
@@ -225,7 +225,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         radiance += throughput * bxdf * cos_theta * light_material.emission * light_material.emission_strength * (-dot(material.normal, new_direction)) / (r*r) / light_sample_point.pdf;  
       }  
     }*/    
-      
+        
  
     /*2. Else -> entity A -> eye*/
     SampleDirection sample_direction = SampleTransportDirection(origin, material, direction, normal, inside, spectrum.wave_length); 

@@ -313,20 +313,34 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
 
 SampleDirection SampleMultilayerTransportDirection(Material material, vec3 in_direction, vec3 normal_direction)
 {
-  if(RandomFloat() < 0.9)
+  float p1 = min(0.8, 1 - material.metallic); 
+  if(RandomFloat() < p1)
   {
     SampleDirection ret = SampleLambertianTransportDirection(normal_direction); 
-    ret.pdf *= 0.9;
+    ret.pdf *= p1;
     return ret;
   }
   else
   {
-    Material new_material = material; 
-    new_material.roughness = material.clearcoat_roughness;
-    new_material.base_color = vec3(0.04);
-    SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
-    ret.pdf *= 0.1;
-    return ret;
+    float p2 = 1 / (1 + material.clearcoat / 2);
+    if(RandomFloat() < p2)
+    {
+      Material new_material = material; 
+      new_material.roughness = material.roughness;
+      new_material.base_color = mix(0.08 * material.specular * mix(vec3(1.0), material.base_color / lum(material.base_color), material.specular_tint), material.base_color, material.metallic);
+      SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
+      ret.pdf *= (1 - p1) * p2;
+      return ret;
+    }
+    else
+    {
+      Material new_material = material; 
+      new_material.roughness = material.clearcoat_roughness;
+      new_material.base_color = vec3(0.04);
+      SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
+      ret.pdf *= (1 - p1) * (1 - p2);
+      return ret;
+    }
   }
 }
 // /*LighSource Sample*/

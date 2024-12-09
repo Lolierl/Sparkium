@@ -103,11 +103,16 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadMesh(chair_mesh, "ChairMesh"); 
 
   Material chair_material;
-  //chair_material.base_color = {1.000f, 0.766f, 0.336f};
-	chair_material.type=MATERIAL_TYPE_NONMETAL; 
+  chair_material.base_color = {0.5f, 0.3f, 0.1f};
+	chair_material.type=MATERIAL_TYPE_MULTILAYER; 
   chair_material.roughness = 1.0;
   chair_material.sheen = 1.0; 
   chair_material.sheen_tint = 0.5;
+  chair_material.clearcoat = 0.5;
+  chair_material.clearcoat_roughness = 0.1;
+  chair_material.specular = 0.5; 
+  chair_material.specular_tint = 0.5;
+  chair_material.metallic = 0.5; 
   
   Texture chair_texture;
   chair_texture.LoadFromFile(
@@ -150,9 +155,10 @@ void LoadSunFlowerDog(Scene *scene)
   sofa_material.roughness = 0.4;
   sofa_material.sheen = 0.3; 
   sofa_material.sheen_tint = 0.5;
-  sofa_material.clearcoat = 0.5; 
+  sofa_material.clearcoat = 1.0; 
   sofa_material.clearcoat_roughness = 0.1; 
-
+  sofa_material.specular = 0.4;
+  sofa_material.specular_tint = 0.5;
   Texture sofa_texture;
   sofa_texture.LoadFromFile(
       FindAssetsFile("texture/sofa/Koltuk2.png"),
@@ -297,7 +303,15 @@ void LoadSunFlowerDog(Scene *scene)
   floor_texture.LoadFromFile(
       FindAssetsFile("texture/floor.jpg"),
       LDRColorSpace::UNORM);
-
+  floor_material.type = MATERIAL_TYPE_MULTILAYER; 
+  floor_material.roughness = 0.1; 
+  floor_material.sheen = 0.5;
+  floor_material.sheen_tint = 0.5;
+  floor_material.clearcoat = 0.7;
+  floor_material.clearcoat_roughness = 0.1;
+  floor_material.specular = 0.7;
+  floor_material.specular_tint = 0.5;
+  //floor_material.metallic = 0.5;
   auto floor_texture_id =
       asset_manager->LoadTexture(floor_texture, "FloorTexture");
   int floor_id = scene->CreateEntity();
@@ -366,6 +380,15 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
   //(LR, UD, FB)
+
+  /*auto envmap = scene->GetEnvMap();
+
+  Texture envmap_texture;
+  envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
+                              LDRColorSpace::UNORM);
+  auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
+  envmap->SetEnvmapTexture(envmap_id);
+  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});*/
   scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
   scene->Camera()->SetPosition({308.0f, 563.0f, -500.0f});
   scene->Camera()->SetEulerAngles({glm::radians(-30.0f), glm::radians(180.0f), 0.0f});
@@ -633,11 +656,14 @@ void LoadCornellBox(Scene *scene) {
   Material short_box_material;
   short_box_material.type = MATERIAL_TYPE_MULTILAYER;   
   short_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  short_box_material.roughness = 1.0;
+  short_box_material.roughness = 0.1;   
   short_box_material.sheen = 1.0; 
   short_box_material.sheen_tint = 0.5;
   short_box_material.clearcoat = 1.0;
   short_box_material.clearcoat_roughness = 0.5; 
+  short_box_material.metallic = 0; 
+  short_box_material.specular = 0.5;
+  short_box_material.specular_tint = 0.5;
   short_box_material.a = 1.5046;
   short_box_material.b = 4200;
   short_box_material.c = 7650;

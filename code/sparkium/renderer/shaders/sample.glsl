@@ -311,6 +311,24 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
     return ret;
 }
 
+SampleDirection SampleMultilayerTransportDirection(Material material, vec3 in_direction, vec3 normal_direction)
+{
+  if(RandomFloat() < 0.9)
+  {
+    SampleDirection ret = SampleLambertianTransportDirection(normal_direction); 
+    ret.pdf *= 0.9;
+    return ret;
+  }
+  else
+  {
+    Material new_material = material; 
+    new_material.roughness = material.clearcoat_roughness;
+    new_material.base_color = vec3(0.04);
+    SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
+    ret.pdf *= 0.1;
+    return ret;
+  }
+}
 // /*LighSource Sample*/
 // SampleDirection SampleDirectLighting(vec3 origin) 
 // {
@@ -362,6 +380,9 @@ SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in
   }
   else if (material.type == MATERIAL_TYPE_NONMETAL) {
     return SampleLambertianTransportDirection(normal_direction);
+  }
+  else if (material.type == MATERIAL_TYPE_MULTILAYER) {
+    return SampleMultilayerTransportDirection(material, in_direction, normal_direction);
   }
 }
 

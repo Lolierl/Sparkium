@@ -205,12 +205,12 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         origin = origin + direction * t_max;
         direction = SamplePhaseFunction(material, direction);
         continue;
-      }
-    }  
+      }  
+    }      
     
     /*2. LightSource -> entity A -> eye (Special Treatment for Lambertian material)*/
     /*if(is_LAMBERTIAN)
-    {
+    {   
       LightSamplePoint light_sample_point = SampleDirectLighting(origin);
       float r = distance(origin, light_sample_point.position); 
       vec3 new_direction = normalize(light_sample_point.position - origin);
@@ -224,9 +224,9 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         cos_theta = dot(normal, new_direction);
         radiance += throughput * bxdf * cos_theta * light_material.emission * light_material.emission_strength * (-dot(material.normal, new_direction)) / (r*r) / light_sample_point.pdf;  
       }  
-    }*/   
+    }*/    
       
-
+ 
     /*2. Else -> entity A -> eye*/
     SampleDirection sample_direction = SampleTransportDirection(origin, material, direction, normal, inside, spectrum.wave_length); 
     vec3 new_direction = sample_direction.direction;

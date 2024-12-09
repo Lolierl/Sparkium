@@ -43,7 +43,7 @@ void LoadSunFlowerDog(Scene *scene)
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 1.0f};
   light_material.emission_strength = 30.0f;
-  light_material.spectrum_type = SPECTRUM_TYPE_SODIUM;
+  light_material.spectrum_type = SPECTRUM_TYPE_D50;
   light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
@@ -135,6 +135,37 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityAlbedoTexture(chair_id, chair_texture_id);
   scene->SetEntityRoughnessTexture(chair_id, chair_roughness_texture_id);
   scene->SetEntityNormalTexture(chair_id, chair_normal_texture_id);
+
+  Mesh sofa_mesh;
+	sofa_mesh.LoadObjFile(FindAssetsFile("mesh/sofa/Koltuk.obj"));
+	sofa_mesh.scale(270.0f);
+  sofa_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	sofa_mesh.translate(glm::vec3(500.0f, 0.0f, 200.0f));
+
+  int sofa_mesh_id =
+      asset_manager->LoadMesh(sofa_mesh, "SofaMesh"); 
+
+  Material sofa_material;
+	sofa_material.type=MATERIAL_TYPE_MULTILAYER; 
+  sofa_material.roughness = 0.4;
+  sofa_material.sheen = 0.3; 
+  sofa_material.sheen_tint = 0.5;
+  sofa_material.clearcoat = 0.5; 
+  sofa_material.clearcoat_roughness = 0.1; 
+
+  Texture sofa_texture;
+  sofa_texture.LoadFromFile(
+      FindAssetsFile("texture/sofa/Koltuk2.png"),
+      LDRColorSpace::UNORM);
+
+  auto sofa_texture_id =
+      asset_manager->LoadTexture(sofa_texture, "SofaTexture");
+
+  int sofa_id = scene->CreateEntity();
+  scene->SetEntityMesh(sofa_id, sofa_mesh_id);
+  scene->SetEntityMaterial(sofa_id, sofa_material);
+  scene->SetEntityAlbedoTexture(sofa_id, sofa_texture_id);
+  
   Mesh glass_mesh;
 	glass_mesh.LoadObjFile(FindAssetsFile("mesh/Glass/Glass OBJ.obj"));
 	glass_mesh.scale(40.0f);
@@ -600,8 +631,13 @@ void LoadCornellBox(Scene *scene) {
   int short_box_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "ShortBoxMesh");
   Material short_box_material;
-  short_box_material.type = MATERIAL_TYPE_RETRACTIVE; 
+  short_box_material.type = MATERIAL_TYPE_MULTILAYER;   
   short_box_material.base_color = {0.8f, 0.8f, 0.8f};
+  short_box_material.roughness = 1.0;
+  short_box_material.sheen = 1.0; 
+  short_box_material.sheen_tint = 0.5;
+  short_box_material.clearcoat = 1.0;
+  short_box_material.clearcoat_roughness = 0.5; 
   short_box_material.a = 1.5046;
   short_box_material.b = 4200;
   short_box_material.c = 7650;

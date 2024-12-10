@@ -146,23 +146,6 @@ vec3 UniformSampleHemisphere(vec3 normal)
 //     return ret;
 // }
 /*Radiance Sample*/
-vec3 GGXsampleMicroNormal(float alpha, vec3 N)
-{
-	vec2 rand = vec2(RandomFloat(), RandomFloat());
-	float xi_1 = rand.x;
-	float xi_2 = rand.y;
-
-	float theta = atan(alpha * sqrt(xi_1) / sqrt(1 - xi_1));
-	float phi = 2 * PI * xi_2;
-	vec3 NotN = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-	vec3 T = normalize(cross(NotN, N));	
-	vec3 B = cross(N, T);		
-
-	return T * (sin(theta) * cos(phi)) +
-		B * (sin(theta) * sin(phi)) +
-		N * cos(theta);
-}
-
 SampleDirection SampleLambertianTransportDirection(vec3 normal_direction) {
   float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
   float u2 = float(RandomUint()) / float(0xFFFFFFFFu);

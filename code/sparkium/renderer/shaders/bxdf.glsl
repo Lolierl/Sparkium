@@ -96,11 +96,11 @@ vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_dire
   
   if(match1 > 0.9999)
   {
-    return vec3(ratio * material.base_color / abs(dot(normal, -in_direction)));
+    return ratio * material.base_color / abs(dot(normal_direction, -in_direction));
   }
   else if(match2 > 0.9999)
   {
-    return vec3((1 - ratio) / etap / etap / abs(dot(normal_direction, -in_direction)));
+    return (1 - ratio)  * material.base_color / etap / etap / abs(dot(normal_direction, -in_direction));
   }
   else
   {

@@ -250,7 +250,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
       radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
       break; 
-    } else 
+    } else  
     {
       origin = hit_record.position;
       direction = new_direction; 

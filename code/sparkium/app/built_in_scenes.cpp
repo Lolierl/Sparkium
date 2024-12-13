@@ -88,7 +88,7 @@ void LoadSunFlowerDog(Scene *scene)
   int light2_id = scene->CreateEntity();
   scene->SetEntityMesh(light2_id, light2_mesh_id);
   scene->SetEntityMaterial(light2_id, light2_material);
-
+/*
   Mesh plate_mesh;
 	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
 	plate_mesh.scale(50.0f);
@@ -107,7 +107,7 @@ void LoadSunFlowerDog(Scene *scene)
 
   int plate_id = scene->CreateEntity();
   scene->SetEntityMesh(plate_id, plate_mesh_id);
-
+*/
   Mesh bed_mesh;
 	bed_mesh.LoadObjFile(FindAssetsFile("mesh/bed/bed.obj"));
 	bed_mesh.scale(220.0f);  

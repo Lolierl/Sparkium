@@ -64,8 +64,9 @@ vec3 CalculateNonMetalBRDF(Material material, vec3 in_direction, vec3 out_direct
   float cosThetaO = max(dot(normal_direction, out_direction), 0.0);
   float cosThetaH = max(dot(-in_direction, h), 0.0);
   float FD90 = 0.5 + 2.0 * cosThetaH * cosThetaH * material.roughness;
-  return material.base_color * INV_PI * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaI, 5.0)) * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaO, 5.0))
+  vec3 res = material.base_color * INV_PI * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaI, 5.0)) * (1.0 + (FD90 - 1.0) * pow(1.0 - cosThetaO, 5.0))
          + mix(vec3(1.0), material.base_color / lum(material.base_color), material.sheen_tint) * material.sheen * pow(1.0 - cosThetaH, 5.0); 
+  return max(res, vec3(0.0)); 
 }
 
 vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
@@ -138,8 +139,7 @@ vec3 CalculateMetalBRDF(Material material, vec3 in_direction, vec3 out_direction
   
   // Combine terms to get the specular BRDF
   vec3 specular = (F * G * D) / (4.0 * NdotV * NdotL);
-  
-  return specular;
+  return max(specular, vec3(0.0));
 }
 vec3 CalculateMultilayerBRDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction) {
   Material new_material = material;

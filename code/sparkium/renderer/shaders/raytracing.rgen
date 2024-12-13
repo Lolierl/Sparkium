@@ -207,7 +207,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
         continue;
       }  
     }      
-    
+     
     /*2. LightSource -> entity A -> eye (Special Treatment for Lambertian material)*/
     /*if(is_LAMBERTIAN)
     {   
@@ -234,7 +234,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     if(dot(new_direction, normal) < 0)
       inside = 1.0 - inside; 
     cos_theta = abs(dot(new_direction, normal));
-    throughput *= bxdf * cos_theta / sample_direction.pdf;
+    throughput *= max(bxdf * cos_theta / sample_direction.pdf, vec3(0.0));
     TraceRay(origin + new_direction * 1e-4, new_direction);
   
     /*3.1 Else = No hit*/   
@@ -248,7 +248,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     material = GetMaterial(hit_record);
     if(material.emission_strength > 1e-4 && material.type != MATERIAL_TYPE_VOLUME) {
       float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
-      radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
+      radiance += max(throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf, vec3(0.0));
       break; 
     } else 
     {

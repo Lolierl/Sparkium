@@ -242,7 +242,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       radiance += throughput  * EnvmapSample(new_direction);
       break;
     }  
-
+ 
     /*3.2 Else = entity B. Do Recursion*/    
     hit_record = ComposeHitRecord(ray_payload, origin + new_direction * 1e-4, new_direction);
     material = GetMaterial(hit_record);

@@ -81,25 +81,25 @@ vec3 CalculateSpecularBRDF(Material material, vec3 in_direction, vec3 out_direct
   return specular / abs(dot(normal_direction, -in_direction));
 }
 
-vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal, float inside, float wave_length) {
+vec3 CalculateRetractiveBSDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside, float wave_length) {
   // Calculate the perfect reflection direction
 
-  vec3 reflection_direction = ReflectionDirection(normal, in_direction);
-  float cos_theta = -dot(in_direction, normal);
+  vec3 reflection_direction = ReflectionDirection(normal_direction, in_direction);
+  float cos_theta = -dot(in_direction, normal_direction);
   float n = material.a + material.b / pow(wave_length, 2.0) + material.c / pow(wave_length, 4.0);
   float etap = (inside < 1e-3) ? n : 1.0 / n;
-  vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
-  float ratio = FresnelReflectionRate(in_direction, -normal, etap); 
+  vec3 retraction_direction = RefractionDirection(normal_direction, in_direction, etap); 
+  float ratio = FresnelReflectionRate(in_direction, -normal_direction, etap); 
   float match1 = max(dot(reflection_direction, out_direction), 0.0);
   float match2 = max(dot(retraction_direction, out_direction), 0.0);
   
   if(match1 > 0.9999)
   {
-    return vec3(ratio / abs(dot(normal, -in_direction)));
+    return vec3(ratio / abs(dot(normal_direction, -in_direction)));
   }
   else if(match2 > 0.9999)
   {
-    return vec3((1 - ratio) / etap / etap / abs(dot(normal, -in_direction)));
+    return vec3((1 - ratio) / etap / etap / abs(dot(normal_direction, -in_direction)));
   }
   else
   {
@@ -206,6 +206,14 @@ vec3 CalculateAnisotropicMetalBRDF(Material material, vec3 in_direction, vec3 ou
     
     return specular;
 }
+
+vec3 CalculateColoredRetractiveBSDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside, float wave_length) {
+  if (RandomFloat() > material.alpha) {
+    return CalculateRetractiveBSDF(material, in_direction, out_direction, normal_direction, inside, wave_length) * material.base_color;
+  }
+  return CalculateLambertianBRDF(material, in_direction, out_direction, normal_direction);
+}
+
 vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec3 normal_direction, float inside, float wave_length) {
   if (material.type == MATERIAL_TYPE_LAMBERTIAN) {
     return CalculateLambertianBRDF(material, in_direction, out_direction, normal_direction);
@@ -228,7 +236,9 @@ vec3 CalculateBxDF(Material material, vec3 in_direction, vec3 out_direction, vec
   else if(material.type == MATERIAL_TYPE_MULTILAYER) {
     return CalculateMultilayerBRDF(material, in_direction, out_direction, normal_direction);
   }
-
+  else if(material.type == MATERIAL_TYPE_COLORED_RETRACTIVE) {
+    return CalculateColoredRetractiveBSDF(material, in_direction, out_direction, normal_direction, inside, wave_length);
+  }
 }
 
 #endif

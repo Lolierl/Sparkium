@@ -152,11 +152,11 @@ vec3 SampleRay(vec3 origin, vec3 direction)
  
   /*Hit an entity A*/ 
   float cos_theta = 1.0f;
-  if(dot(normal, direction) > 0)
-    normal = -normal; 
  
   for (int depth = 0; depth < scene_settings.num_bounces; depth++) 
   {
+    if(dot(normal, direction) > 0)
+      normal = -normal; 
     if(throughput[0] < 0.2 && throughput[1] < 0.2 && throughput[2] < 0.2)
     {
       if(RandomFloat() <= RR)
@@ -164,7 +164,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
       else
         throughput /= (1 - RR);
     }
-    bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN);  
+    bool is_LAMBERTIAN = (material.type == MATERIAL_TYPE_LAMBERTIAN); 
     bool is_VOLUME = (material.type == MATERIAL_TYPE_VOLUME);
     
     /*Direct Illumination*/

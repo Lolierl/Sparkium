@@ -49,19 +49,41 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);
 
+  Mesh sphere_mesh;
+	glm::vec3 sphere_position = glm::vec3(103.0f, 468.7f, 187.0f);  // Position of the sphere
+	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
+	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
+
+	Material sphere_material;
+	sphere_material.base_color = {1.000, 0.766, 0.336};
+	sphere_material.type = MATERIAL_TYPE_VOLUME;
+  sphere_material.roughness = 0.4; 
+  sphere_material.anisotropic = 0;
+  sphere_material.anisotropic_rotation = 0;
+  sphere_material.a = 1.5046;
+  sphere_material.b = 4200;
+  sphere_material.c = 7650;
+  sphere_material.g = 0.9;
+  sphere_material.sigma_a = 3e-3 * 0.0;
+  sphere_material.sigma_s = 3e-3 * 1.0;
+  sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
+  sphere_material.emission_strength = 1.0f;
+	int sphere_id = scene->CreateEntity();
+	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
+	scene->SetEntityMaterial(sphere_id, sphere_material);
 
   vertices.clear(); 
-  vertices.push_back(make_vertex({1043.0f, 1048.7f, 932.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 1048.7f, 932.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, -200.0f, 932.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({1043.0f, -200.0f, 932.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-457.0f, 1248.7f, 2932.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({-1900.0f, 1248.7f, 2932.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-1900.0f, 400.0f, 2932.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-457.0f, 400.0f, 2932.0f}, {0.0f, 1.0f}));
   int light2_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "Light2Mesh");
   Material light2_material;
   light2_material.base_color = {0.0f, 0.0f, 0.0f};
   light2_material.emission = {1.0f, 1.0f, 1.0f};
-  light2_material.emission_strength = 1.5f;
-  light2_material.spectrum_type = SPECTRUM_TYPE_D75;
+  light2_material.emission_strength = 100;
+  light2_material.spectrum_type = SPECTRUM_TYPE_D65;
   light2_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   int light2_id = scene->CreateEntity();
   scene->SetEntityMesh(light2_id, light2_mesh_id);
@@ -512,8 +534,8 @@ void LoadSunFlowerDog(Scene *scene)
   //scene->SetEntityAlbedoTexture(window_id, window_texture_id);
   
   vertices.clear();
-  vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, -800.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, -800.0f}, {1.0f, 0.0f}));
   vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {1.0f, 1.0f}));
   vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {0.0f, 1.0f}));
   int floor_mesh_id =
@@ -549,10 +571,10 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
   vertices.clear();
-  vertices.push_back(make_vertex({1000.0f, 848.8f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, -800.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({1000.0f, 848.8f, 559.2f}, {1.0f, 0.0f}));
   vertices.push_back(make_vertex({-400.0f, 848.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({-400.0f, 848.8f, -400.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, -800.0f}, {0.0f, 1.0f}));
   int ceiling_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
   Material ceiling_material;
@@ -597,8 +619,8 @@ void LoadSunFlowerDog(Scene *scene)
 
   vertices.clear();
   vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 848.8f, -400.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f, -800.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, -800.0f}, {1.0f, 1.0f}));
   vertices.push_back(make_vertex({-400.0f, 848.8f, 559.2f}, {0.0f, 1.0f}));
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
@@ -609,10 +631,10 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(right_wall_id, right_wall_material);
 
   vertices.clear();
-  vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f, -800.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
   vertices.push_back(make_vertex({1000.0f, 848.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({1000.0f, 848.8f, -400.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, -800.0f}, {0.0f, 1.0f}));
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;
@@ -620,18 +642,30 @@ void LoadSunFlowerDog(Scene *scene)
   int left_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
+
+  vertices.clear();
+  vertices.push_back(make_vertex({1000.0f, 848.8f, -800.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, -800.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 0.0f,  -800.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 0.0f,  -800.0f}, {0.0f, 0.0f}));
+  int front_wall_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "FrontWallMesh");
+  Material front_wall_material;
+  front_wall_material.base_color = {0.2, 0.6, 1.0};
+  int front_wall_id = scene->CreateEntity();
+  scene->SetEntityMesh(front_wall_id, front_wall_mesh_id);
+  scene->SetEntityMaterial(front_wall_id, front_wall_material);
   //(LR, UD, FB)
 
   auto envmap = scene->GetEnvMap();
 
-  /*Texture envmap_texture;
+  Texture envmap_texture;
   envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
                               LDRColorSpace::UNORM);
   auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
   envmap->SetEnvmapTexture(envmap_id);
 
-  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});*/
-  scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
+  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});
   scene->Camera()->SetPosition({208.0f, 593.0f, -800.0f});
   scene->Camera()->SetEulerAngles({glm::radians(-20.0f), glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
@@ -1026,7 +1060,7 @@ void LoadIslandScene(Scene *scene) {
                               LDRColorSpace::UNORM);
   auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
   envmap->SetEnvmapTexture(envmap_id);
-  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});
+  scene->SetEnvmapSettings({0.0f, 0.1f, uint32_t(envmap_id), 0});
 
   int entity_id = scene->CreateEntity();
 

@@ -127,7 +127,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
   vec3 bxdf = vec3(1.0);
   
   float RR = 0.1; 
-  float inside = 0.0; 
+  float inside = 0.0;
   TraceRay(origin, direction);  
 
   /*Sample WaveLength*/
@@ -248,7 +248,7 @@ vec3 SampleRay(vec3 origin, vec3 direction)
     material = GetMaterial(hit_record);
     if(material.emission_strength > 1e-4 && material.type != MATERIAL_TYPE_VOLUME) {
       float light_strength = CalculateLightStrength(material, origin, direction, hit_record.geometry_normal, spectrum.wave_length);
-      radiance += max(throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf, vec3(0.0));
+      radiance += throughput * light_strength * WaveLengthToRGB(spectrum.wave_length) / spectrum.pdf;
       break; 
     } else 
     {

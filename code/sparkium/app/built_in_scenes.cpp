@@ -295,7 +295,7 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadMesh(chair_mesh, "ChairMesh"); 
 
   Material chair_material;
-olor = {0.5f, 0.3f, 0.1f};
+  chair_material.base_color = {0.5f, 0.3f, 0.1f};
 	chair_material.type=MATERIAL_TYPE_MULTILAYER; 
   chair_material.roughness = 1.0;
   chair_material.sheen = 1.0; 

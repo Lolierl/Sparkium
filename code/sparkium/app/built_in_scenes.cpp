@@ -49,6 +49,53 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);
 
+  Mesh earth_mesh;
+	earth_mesh.LoadObjFile(FindAssetsFile("mesh/Earth/earth.obj"));
+	earth_mesh.scale(100.0f);
+  earth_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	earth_mesh.translate(glm::vec3(-100.0f, 300.0f, 100.0f));
+
+  int earth_mesh_id =
+      asset_manager->LoadMesh(earth_mesh, "EarthMesh"); 
+
+  Material earth_material;
+  earth_material.base_color = {1.000f, 1.000f, 1.000f};
+	earth_material.type=MATERIAL_TYPE_METAL;
+  earth_material.roughness = 0.4;
+  earth_material.a = 1.5046;
+  earth_material.b = 4200;
+  earth_material.c = 7650;  
+  earth_material.alpha = 0.5;
+  Texture earth_texture;
+  earth_texture.LoadFromFile(
+      FindAssetsFile("texture/earth.png"),
+      LDRColorSpace::UNORM);
+
+  auto earth_texture_id =
+      asset_manager->LoadTexture(earth_texture, "EarthTexture");
+  int earth_id = scene->CreateEntity();
+  scene->SetEntityMesh(earth_id, earth_mesh_id);
+  scene->SetEntityMaterial(earth_id, earth_material);
+  scene->SetEntityAlbedoTexture(earth_id, earth_texture_id);
+
+  // Mesh light_sphere_mesh;
+  // glm::vec3 light_sphere_position = glm::vec3(-100.0f, 300.0f, 100.0f);  // Position of the light sphere
+  // light_sphere_mesh.CreateSphere(light_sphere_position, 90.0f, 16, 16);  // Small sphere with radius 10
+  // int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
+
+  // Material light_sphere_material;
+  // light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
+  // light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
+  // light_sphere_material.emission_strength = 30.0f;  // Adjust the strength as needed
+  // light_sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
+  // // light_sphere_material.type = MATERIAL_TYPE_VOLUME;
+  // // light_sphere_material.sigma_a = 5e-4 * 0.2;
+  // // light_sphere_material.sigma_s = 5e-4 * 0.8;
+  // light_sphere_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
+  // int light_sphere_id = scene->CreateEntity();
+  // scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
+  // scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
+
 
   Mesh plate_mesh;
 	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
@@ -62,7 +109,7 @@ void LoadSunFlowerDog(Scene *scene)
   plate_material.base_color = {1.000f, 1.000f, 1.000f};
 	plate_material.type=MATERIAL_TYPE_LAMBERTIAN;
   plate_material.roughness = 0.4;
-  plate_material.ior = 1.5; 
+  plate_material.ior = 1.5;
   
   int plate_id = scene->CreateEntity();
   scene->SetEntityMesh(plate_id, plate_mesh_id);
@@ -72,7 +119,7 @@ void LoadSunFlowerDog(Scene *scene)
 	table_mesh.LoadObjFile(FindAssetsFile("mesh/Table/Wood_Table.obj"));
 	table_mesh.scale(200.0f);
 	table_mesh.translate(glm::vec3(200.0f, 0.0f, 100.0f));
-
+ 
   int table_mesh_id =
       asset_manager->LoadMesh(table_mesh, "TableMesh"); 
 
@@ -104,7 +151,7 @@ void LoadSunFlowerDog(Scene *scene)
 
   Material chair_material;
   //chair_material.base_color = {1.000f, 0.766f, 0.336f};
-	chair_material.type=MATERIAL_TYPE_NONMETAL; 
+	chair_material.type=MATERIAL_TYPE_METAL; 
   chair_material.roughness = 1.0;
   chair_material.sheen = 1.0; 
   chair_material.sheen_tint = 0.5;
@@ -366,7 +413,14 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
   //(LR, UD, FB)
-  scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
+  auto envmap = scene->GetEnvMap();
+
+  Texture envmap_texture;
+  envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
+                              LDRColorSpace::UNORM);
+  auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
+  envmap->SetEnvmapTexture(envmap_id);
+  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});
   scene->Camera()->SetPosition({308.0f, 563.0f, -500.0f});
   scene->Camera()->SetEulerAngles({glm::radians(-30.0f), glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
@@ -481,16 +535,16 @@ void LoadCornellBox(Scene *scene) {
   scene->SetEntityMesh(floor_id, floor_mesh_id);
   scene->SetEntityMaterial(floor_id, floor_material);
 
-  Texture terrain_texture;
-  terrain_texture.LoadFromFile(
-      FindAssetsFile("texture/earth.jpg"),
-      LDRColorSpace::UNORM);
+  // Texture terrain_texture;
+  // terrain_texture.LoadFromFile(
+  //     FindAssetsFile("texture/earth.jpg"),
+  //     LDRColorSpace::UNORM);
 
 //   Texture terrain_detail_texture;
 // //   terrain_detail_texture.LoadFromFile(
 // //       FindAssetsFile("texture/earth_clouds.jpg"), LDRColorSpace::UNORM);
-  auto terrain_texture_id =
-      asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
+  // auto terrain_texture_id =
+      // asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
 //   auto terrain_detail_texture_id = asset_manager->LoadTexture(
 //       terrain_detail_texture, "TerrainDetailTexture");
@@ -531,7 +585,7 @@ void LoadCornellBox(Scene *scene) {
   int back_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
   scene->SetEntityMaterial(back_wall_id, back_wall_material);
-  scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+  // scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
 //   scene->SetEntityAlbedoDetailTexture(back_wall_id, terrain_detail_texture_id);
   // right_wall
   // <vertex position="0.0   0.0 559.2 " tex_coord="0 0"/>

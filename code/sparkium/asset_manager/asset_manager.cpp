@@ -142,7 +142,22 @@ int AssetManager::LoadTexture(const Texture &texture, std::string name) {
 int AssetManager::LoadMesh(const Mesh &mesh, std::string name) {
   auto &vertices = mesh.Vertices();
   auto &indices = mesh.Indices();
-
+  /*if(name == "WindowMesh")
+  {
+    float maxx = -1e9, maxy = -1e9, maxz = -1e9;
+    float minx = 1e9, miny = 1e9, minz = 1e9;
+    for(auto &vertex : vertices)
+    {
+      maxx = std::max(maxx, vertex.position.x);
+      maxy = std::max(maxy, vertex.position.y);
+      maxz = std::max(maxz, vertex.position.z);
+      minx = std::min(minx, vertex.position.x);
+      miny = std::min(miny, vertex.position.y);
+      minz = std::min(minz, vertex.position.z);
+    }
+    std::cout << "maxx: " << maxx << " maxy: " << maxy << " maxz: " << maxz << std::endl;
+    std::cout << "minx: " << minx << " miny: " << miny << " minz: " << minz << std::endl;
+  }*/
   float area = 0.0;
   std::vector<float> area_cdf(indices.size() / 3);
   for (int i = 0; i < indices.size() / 3; i++) {

@@ -146,23 +146,6 @@ vec3 UniformSampleHemisphere(vec3 normal)
 //     return ret;
 // }
 /*Radiance Sample*/
-vec3 GGXsampleMicroNormal(float alpha, vec3 N)
-{
-	vec2 rand = vec2(RandomFloat(), RandomFloat());
-	float xi_1 = rand.x;
-	float xi_2 = rand.y;
-
-	float theta = atan(alpha * sqrt(xi_1) / sqrt(1 - xi_1));
-	float phi = 2 * PI * xi_2;
-	vec3 NotN = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-	vec3 T = normalize(cross(NotN, N));	
-	vec3 B = cross(N, T);		
-
-	return T * (sin(theta) * cos(phi)) +
-		B * (sin(theta) * sin(phi)) +
-		N * cos(theta);
-}
-
 SampleDirection SampleLambertianTransportDirection(vec3 normal_direction) {
   float u1 = float(RandomUint()) / float(0xFFFFFFFFu);
   float u2 = float(RandomUint()) / float(0xFFFFFFFFu);
@@ -313,20 +296,34 @@ SampleDirection SampleAnisotropicMicrofacet(Material material, vec3 in_direction
 
 SampleDirection SampleMultilayerTransportDirection(Material material, vec3 in_direction, vec3 normal_direction)
 {
-  if(RandomFloat() < 0.9)
+  float p1 = min(0.8, 1 - material.metallic); 
+  if(RandomFloat() < p1)
   {
     SampleDirection ret = SampleLambertianTransportDirection(normal_direction); 
-    ret.pdf *= 0.9;
+    ret.pdf *= p1;
     return ret;
   }
   else
   {
-    Material new_material = material; 
-    new_material.roughness = material.clearcoat_roughness;
-    new_material.base_color = vec3(0.04);
-    SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
-    ret.pdf *= 0.1;
-    return ret;
+    float p2 = 1 / (1 + material.clearcoat / 2);
+    if(RandomFloat() < p2)
+    {
+      Material new_material = material; 
+      new_material.roughness = material.roughness;
+      new_material.base_color = mix(0.08 * material.specular * mix(vec3(1.0), material.base_color / lum(material.base_color), material.specular_tint), material.base_color, material.metallic);
+      SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
+      ret.pdf *= (1 - p1) * p2;
+      return ret;
+    }
+    else
+    {
+      Material new_material = material; 
+      new_material.roughness = material.clearcoat_roughness;
+      new_material.base_color = vec3(0.04);
+      SampleDirection ret = SampleMetalTransportDirection(new_material, in_direction, normal_direction); 
+      ret.pdf *= (1 - p1) * (1 - p2);
+      return ret;
+    }
   }
 }
 

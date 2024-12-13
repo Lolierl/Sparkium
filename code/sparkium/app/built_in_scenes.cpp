@@ -33,69 +33,39 @@ void LoadSunFlowerDog(Scene *scene)
   // <vertex position="213.0 548.7 332.0" tex_coord="1 1"/>
   // <vertex position="213.0 548.7 227.0" tex_coord="0 1"/>
   //light
-  vertices.push_back(make_vertex({343.0f, 648.7f, 227.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({343.0f, 648.7f, 332.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({213.0f, 648.7f, 332.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({213.0f, 648.7f, 227.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({343.0f, 848.7f, 227.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({343.0f, 848.7f, 332.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({213.0f, 848.7f, 332.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({213.0f, 848.7f, 227.0f}, {0.0f, 1.0f}));
   int light_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LightMesh");
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 1.0f};
   light_material.emission_strength = 30.0f;
-  light_material.spectrum_type = SPECTRUM_TYPE_D50;
+  light_material.spectrum_type = SPECTRUM_TYPE_D75;
   light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);
 
-  Mesh earth_mesh;
-	earth_mesh.LoadObjFile(FindAssetsFile("mesh/Earth/earth.obj"));
-	earth_mesh.scale(100.0f);
-  earth_mesh.rotate(180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	earth_mesh.translate(glm::vec3(-100.0f, 300.0f, 100.0f));
 
-  int earth_mesh_id =
-      asset_manager->LoadMesh(earth_mesh, "EarthMesh"); 
-
-  Material earth_material;
-  earth_material.base_color = {1.000f, 1.000f, 1.000f};
-	earth_material.type=MATERIAL_TYPE_METAL;
-  earth_material.roughness = 0.4;
-  earth_material.a = 1.5046;
-  earth_material.b = 4200;
-  earth_material.c = 7650;  
-  earth_material.alpha = 0.5;
-  Texture earth_texture;
-  earth_texture.LoadFromFile(
-      FindAssetsFile("texture/earth.png"),
-      LDRColorSpace::UNORM);
-
-  auto earth_texture_id =
-      asset_manager->LoadTexture(earth_texture, "EarthTexture");
-  int earth_id = scene->CreateEntity();
-  scene->SetEntityMesh(earth_id, earth_mesh_id);
-  scene->SetEntityMaterial(earth_id, earth_material);
-  scene->SetEntityAlbedoTexture(earth_id, earth_texture_id);
-
-  // Mesh light_sphere_mesh;
-  // glm::vec3 light_sphere_position = glm::vec3(-100.0f, 300.0f, 100.0f);  // Position of the light sphere
-  // light_sphere_mesh.CreateSphere(light_sphere_position, 90.0f, 16, 16);  // Small sphere with radius 10
-  // int light_sphere_mesh_id = asset_manager->LoadMesh(light_sphere_mesh, "LightSphereMesh");
-
-  // Material light_sphere_material;
-  // light_sphere_material.base_color = {1.0f, 1.0f, 1.0f};  // White light
-  // light_sphere_material.emission = {1.0f, 1.0f, 1.0f};  // Emissive material
-  // light_sphere_material.emission_strength = 30.0f;  // Adjust the strength as needed
-  // light_sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
-  // // light_sphere_material.type = MATERIAL_TYPE_VOLUME;
-  // // light_sphere_material.sigma_a = 5e-4 * 0.2;
-  // // light_sphere_material.sigma_s = 5e-4 * 0.8;
-  // light_sphere_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
-  // int light_sphere_id = scene->CreateEntity();
-  // scene->SetEntityMesh(light_sphere_id, light_sphere_mesh_id);
-  // scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
-
+  vertices.clear(); 
+  vertices.push_back(make_vertex({1043.0f, 1048.7f, 932.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 1048.7f, 932.0f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, -200.0f, 932.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({1043.0f, -200.0f, 932.0f}, {0.0f, 1.0f}));
+  int light2_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, indices), "Light2Mesh");
+  Material light2_material;
+  light2_material.base_color = {0.0f, 0.0f, 0.0f};
+  light2_material.emission = {1.0f, 1.0f, 1.0f};
+  light2_material.emission_strength = 1.5f;
+  light2_material.spectrum_type = SPECTRUM_TYPE_D75;
+  light2_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
+  int light2_id = scene->CreateEntity();
+  scene->SetEntityMesh(light2_id, light2_mesh_id);
+  scene->SetEntityMaterial(light2_id, light2_material);
 
   Mesh plate_mesh;
 	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
@@ -107,31 +77,205 @@ void LoadSunFlowerDog(Scene *scene)
 
   Material plate_material;
   plate_material.base_color = {1.000f, 1.000f, 1.000f};
-	plate_material.type=MATERIAL_TYPE_LAMBERTIAN;
-  plate_material.roughness = 0.4;
-  plate_material.ior = 1.5;
-  
+
+	plate_material.type=MATERIAL_TYPE_MULTILAYER;
+  plate_material.roughness = 0.1;
+  plate_material.specular = 0.5;
+  plate_material.specular_tint = 0.5;
+
   int plate_id = scene->CreateEntity();
   scene->SetEntityMesh(plate_id, plate_mesh_id);
-  scene->SetEntityMaterial(plate_id, plate_material);
+
+  Mesh bed_mesh;
+	bed_mesh.LoadObjFile(FindAssetsFile("mesh/bed/bed.obj"));
+	bed_mesh.scale(220.0f);  
+  bed_mesh.rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  bed_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	bed_mesh.translate(glm::vec3(-200.0f, 0.0f, 350.0f));
+  int bed_mesh_id =
+      asset_manager->LoadMesh(bed_mesh, "BedMesh"); 
+
+  Material bed_material;
+  bed_material.base_color = {1.000f, 1.000f, 1.000f};
+	bed_material.type=MATERIAL_TYPE_MULTILAYER;
+  bed_material.roughness = 0.4;
+  bed_material.specular = 0.5;
+  bed_material.specular_tint = 0.5;
+  
+  Texture bed_texture;
+  bed_texture.LoadFromFile(
+      FindAssetsFile("texture/bed/bed.png"),
+      LDRColorSpace::UNORM);
+
+  auto bed_texture_id =
+      asset_manager->LoadTexture(bed_texture, "BedTexture");
+  int bed_id = scene->CreateEntity();
+  scene->SetEntityMesh(bed_id, bed_mesh_id);
+  scene->SetEntityMaterial(bed_id, bed_material);
+  scene->SetEntityAlbedoTexture(bed_id, bed_texture_id);
+
+
+  Mesh mattress_mesh;
+	mattress_mesh.LoadObjFile(FindAssetsFile("mesh/bed/bed2.obj"));
+  mattress_mesh.scalebyindex(glm::vec3(285.0f, 290.0f, 290.0f));  
+  mattress_mesh.rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  mattress_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	mattress_mesh.translate(glm::vec3(-195.0f, 10.0f, 345.0f));
+  int mattress_mesh_id =
+      asset_manager->LoadMesh(mattress_mesh, "BedMesh"); 
+
+  Material mattress_material;
+	mattress_material.type=MATERIAL_TYPE_MULTILAYER; 
+  mattress_material.roughness = 0.8;
+  mattress_material.sheen = 0.3; 
+  mattress_material.sheen_tint = 0.5;
+  mattress_material.specular = 0.2; 
+  mattress_material.specular_tint = 0.3;
+  
+  Texture mattress_texture;
+  mattress_texture.LoadFromFile(
+      FindAssetsFile("texture/dragon.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto mattress_texture_id =
+      asset_manager->LoadTexture(mattress_texture, "MattressTexture");
+  int mattress_id = scene->CreateEntity();
+  scene->SetEntityMesh(mattress_id, mattress_mesh_id);
+  scene->SetEntityMaterial(mattress_id, mattress_material);
+  scene->SetEntityAlbedoTexture(mattress_id, mattress_texture_id);
+
+  Mesh frame1_mesh;
+	frame1_mesh.LoadObjFile(FindAssetsFile("mesh/frame/frame.obj"));
+	frame1_mesh.scale(70.0f);  
+  frame1_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //frame1_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	frame1_mesh.translate(glm::vec3(-400.0f, 500.0f, 200.0f));
+  int frame1_mesh_id =
+      asset_manager->LoadMesh(frame1_mesh, "frame1Mesh"); 
+
+  Material frame1_material;
+  frame1_material.base_color = {1.000f, 1.000f, 1.000f};
+	frame1_material.type=MATERIAL_TYPE_MULTILAYER;
+  frame1_material.roughness = 0.4;
+  frame1_material.specular = 0.2;
+  frame1_material.specular_tint = 0.5;
+  
+  Texture frame1_texture;
+  frame1_texture.LoadFromFile(
+      FindAssetsFile("texture/floor.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto frame1_texture_id =
+      asset_manager->LoadTexture(frame1_texture, "frame1Texture");
+  int frame1_id = scene->CreateEntity();
+  scene->SetEntityMesh(frame1_id, frame1_mesh_id);
+  scene->SetEntityMaterial(frame1_id, frame1_material);
+  scene->SetEntityAlbedoTexture(frame1_id, frame1_texture_id);
+
+  Mesh frame2_mesh;
+	frame2_mesh.LoadObjFile(FindAssetsFile("mesh/frame/frame.obj"));
+	frame2_mesh.scale(70.0f);  
+  frame2_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //frame2_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	frame2_mesh.translate(glm::vec3(-400.0f, 500.0f, 400.0f));
+  int frame2_mesh_id =
+      asset_manager->LoadMesh(frame2_mesh, "frame2Mesh"); 
+
+  Material frame2_material;
+  frame2_material.base_color = {1.000f, 1.000f, 1.000f};
+	frame2_material.type=MATERIAL_TYPE_MULTILAYER;
+  frame2_material.roughness = 0.4;
+  frame2_material.specular = 0.2;
+  frame2_material.specular_tint = 0.5;
+  
+  Texture frame2_texture;
+  frame2_texture.LoadFromFile(
+      FindAssetsFile("texture/floor.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto frame2_texture_id =
+      asset_manager->LoadTexture(frame2_texture, "frame2Texture");
+  int frame2_id = scene->CreateEntity();
+  scene->SetEntityMesh(frame2_id, frame2_mesh_id);
+  scene->SetEntityMaterial(frame2_id, frame2_material);
+  scene->SetEntityAlbedoTexture(frame2_id, frame2_texture_id);
+
+    Mesh frame3_mesh;
+    frame3_mesh.LoadObjFile(FindAssetsFile("mesh/frame/frame.obj"));
+    frame3_mesh.scale(70.0f);  
+    frame3_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    //frame3_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    frame3_mesh.translate(glm::vec3(-400.0f, 300.0f, 200.0f));
+    int frame3_mesh_id =
+        asset_manager->LoadMesh(frame3_mesh, "frame3Mesh"); 
+
+    Material frame3_material;
+    frame3_material.base_color = {1.000f, 1.000f, 1.000f};
+    frame3_material.type=MATERIAL_TYPE_MULTILAYER;
+    frame3_material.roughness = 0.4;
+    frame3_material.specular = 0.2;
+    frame3_material.specular_tint = 0.5;
+    
+    Texture frame3_texture;
+    frame3_texture.LoadFromFile(
+        FindAssetsFile("texture/floor.jpg"),
+        LDRColorSpace::UNORM);
+
+    auto frame3_texture_id =
+        asset_manager->LoadTexture(frame3_texture, "frame3Texture");
+    int frame3_id = scene->CreateEntity();
+    scene->SetEntityMesh(frame3_id, frame3_mesh_id);
+    scene->SetEntityMaterial(frame3_id, frame3_material);
+    scene->SetEntityAlbedoTexture(frame3_id, frame3_texture_id);
+
+  Mesh frame4_mesh;
+	frame4_mesh.LoadObjFile(FindAssetsFile("mesh/frame/frame.obj"));
+	frame4_mesh.scale(70.0f);  
+  frame4_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //frame4_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	frame4_mesh.translate(glm::vec3(-400.0f, 300.0f, 400.0f));
+  int frame4_mesh_id =
+      asset_manager->LoadMesh(frame4_mesh, "frame4Mesh"); 
+
+  Material frame4_material;
+  frame4_material.base_color = {1.000f, 1.000f, 1.000f};
+	frame4_material.type=MATERIAL_TYPE_MULTILAYER;
+  frame4_material.roughness = 0.4;
+  frame4_material.specular = 0.2;
+  frame4_material.specular_tint = 0.5;
+  
+  Texture frame4_texture;
+  frame4_texture.LoadFromFile(
+      FindAssetsFile("texture/floor.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto frame4_texture_id =
+      asset_manager->LoadTexture(frame4_texture, "frame4Texture");
+  int frame4_id = scene->CreateEntity();
+  scene->SetEntityMesh(frame4_id, frame4_mesh_id);
+  scene->SetEntityMaterial(frame4_id, frame4_material);
+  scene->SetEntityAlbedoTexture(frame4_id, frame4_texture_id);
 
   Mesh table_mesh;
 	table_mesh.LoadObjFile(FindAssetsFile("mesh/Table/Wood_Table.obj"));
-	table_mesh.scale(200.0f);
-	table_mesh.translate(glm::vec3(200.0f, 0.0f, 100.0f));
- 
+
+	table_mesh.scalebyindex(glm::vec3(120.0f, 150.0f, 120.0f));
+  table_mesh.rotate(75.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	table_mesh.translate(glm::vec3(280.0f, 0.0f, 150.0f));
+
   int table_mesh_id =
       asset_manager->LoadMesh(table_mesh, "TableMesh"); 
 
   Material table_material;
-  table_material.base_color = {1.000f, 0.766f, 0.336f};
-	table_material.type=MATERIAL_TYPE_LAMBERTIAN;
+  table_material.base_color = {1.000f, 1.000f, 1.000f};
+	table_material.type=MATERIAL_TYPE_MULTILAYER;
   table_material.roughness = 0.4;
-  table_material.ior = 1.5; 
+  table_material.specular = 0.5;
+  table_material.specular_tint = 0.5;
   
   Texture table_texture;
   table_texture.LoadFromFile(
-      FindAssetsFile("texture/Wood_Table_C_2.jpg"),
+      FindAssetsFile("texture/Wood_Table_C.jpg"),
       LDRColorSpace::UNORM);
 
   auto table_texture_id =
@@ -143,18 +287,24 @@ void LoadSunFlowerDog(Scene *scene)
 
   Mesh chair_mesh;
 	chair_mesh.LoadObjFile(FindAssetsFile("mesh/chair/chair.obj"));
-	chair_mesh.scale(200.0f);
-	chair_mesh.translate(glm::vec3(200.0f, 0.0f, -100.0f));
+	chair_mesh.scale(150.0f);
+  chair_mesh.rotate(145.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	chair_mesh.translate(glm::vec3(70.0f, 0.0f, 250.0f));
 
   int chair_mesh_id =
       asset_manager->LoadMesh(chair_mesh, "ChairMesh"); 
 
   Material chair_material;
-  //chair_material.base_color = {1.000f, 0.766f, 0.336f};
-	chair_material.type=MATERIAL_TYPE_METAL; 
+olor = {0.5f, 0.3f, 0.1f};
+	chair_material.type=MATERIAL_TYPE_MULTILAYER; 
   chair_material.roughness = 1.0;
   chair_material.sheen = 1.0; 
   chair_material.sheen_tint = 0.5;
+  chair_material.clearcoat = 0.5;
+  chair_material.clearcoat_roughness = 0.1;
+  chair_material.specular = 0.5; 
+  chair_material.specular_tint = 0.5;
+  chair_material.metallic = 0.5; 
   
   Texture chair_texture;
   chair_texture.LoadFromFile(
@@ -185,9 +335,9 @@ void LoadSunFlowerDog(Scene *scene)
 
   Mesh sofa_mesh;
 	sofa_mesh.LoadObjFile(FindAssetsFile("mesh/sofa/Koltuk.obj"));
-	sofa_mesh.scale(270.0f);
+	sofa_mesh.scale(230.0f);
   sofa_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	sofa_mesh.translate(glm::vec3(500.0f, 0.0f, 200.0f));
+	sofa_mesh.translate(glm::vec3(560.0f, 0.0f, 200.0f));
 
   int sofa_mesh_id =
       asset_manager->LoadMesh(sofa_mesh, "SofaMesh"); 
@@ -197,9 +347,10 @@ void LoadSunFlowerDog(Scene *scene)
   sofa_material.roughness = 0.4;
   sofa_material.sheen = 0.3; 
   sofa_material.sheen_tint = 0.5;
-  sofa_material.clearcoat = 0.5; 
+  sofa_material.clearcoat = 1.0; 
   sofa_material.clearcoat_roughness = 0.1; 
-
+  sofa_material.specular = 0.4;
+  sofa_material.specular_tint = 0.5;
   Texture sofa_texture;
   sofa_texture.LoadFromFile(
       FindAssetsFile("texture/sofa/Koltuk2.png"),
@@ -212,7 +363,7 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(sofa_id, sofa_mesh_id);
   scene->SetEntityMaterial(sofa_id, sofa_material);
   scene->SetEntityAlbedoTexture(sofa_id, sofa_texture_id);
-  
+  /*
   Mesh glass_mesh;
 	glass_mesh.LoadObjFile(FindAssetsFile("mesh/Glass/Glass OBJ.obj"));
 	glass_mesh.scale(40.0f);
@@ -330,7 +481,36 @@ void LoadSunFlowerDog(Scene *scene)
   int knife_id = scene->CreateEntity();
   scene->SetEntityMesh(knife_id, knife_mesh_id);
   scene->SetEntityMaterial(knife_id, knife_material);
+*/
+  Mesh window_mesh;
+  window_mesh.LoadObjFile(FindAssetsFile("mesh/Window/window.obj"));
+  window_mesh.scale(200.0f);
+  window_mesh.rotate(-90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  window_mesh.translate(glm::vec3(0.0f, 300.0f, 575.2f));
 
+  int window_mesh_id =
+      asset_manager->LoadMesh(window_mesh, "WindowMesh"); 
+
+  Material window_material;
+  window_material.type=MATERIAL_TYPE_MULTILAYER; 
+  window_material.roughness = 0.1; 
+  window_material.specular = 0.7; 
+  window_material.specular_tint = 0.5; 
+  window_material.clearcoat = 0.7;
+  window_material.clearcoat_roughness = 0.1;
+  Texture window_texture;
+  window_texture.LoadFromFile(
+      FindAssetsFile("texture/Window/window.png"),
+      LDRColorSpace::UNORM);
+
+  auto window_texture_id =
+      asset_manager->LoadTexture(window_texture, "WindowTexture");
+
+  int window_id = scene->CreateEntity();
+  scene->SetEntityMesh(window_id, window_mesh_id);
+  scene->SetEntityMaterial(window_id, window_material);
+  //scene->SetEntityAlbedoTexture(window_id, window_texture_id);
+  
   vertices.clear();
   vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
@@ -339,12 +519,20 @@ void LoadSunFlowerDog(Scene *scene)
   int floor_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "FloorMesh");
   Material floor_material;
-  //floor_material.base_color = {0.0f, 0.0f, 0.8f};
+  floor_material.base_color = {0.8, 0.8, 0.8}; 
   Texture floor_texture;
   floor_texture.LoadFromFile(
       FindAssetsFile("texture/floor.jpg"),
       LDRColorSpace::UNORM);
-
+  floor_material.type = MATERIAL_TYPE_MULTILAYER; 
+  floor_material.roughness = 0.1; 
+  floor_material.sheen = 0.5;
+  floor_material.sheen_tint = 0.5;
+  floor_material.clearcoat = 0.7;
+  floor_material.clearcoat_roughness = 0.1;
+  floor_material.specular = 0.7;
+  floor_material.specular_tint = 0.5;
+  //floor_material.metallic = 0.5;
   auto floor_texture_id =
       asset_manager->LoadTexture(floor_texture, "FloorTexture");
   int floor_id = scene->CreateEntity();
@@ -361,41 +549,61 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadTexture(terrain_texture, "TerrainTexture");
 
   vertices.clear();
-  vertices.push_back(make_vertex({1000.0f, 648.8f, -400.0f}, {0.0f, 0.0f}));
-  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({-400.0f, 648.8f, -400.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, -400.0f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, -400.0f}, {0.0f, 1.0f}));
   int ceiling_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "CeilingMesh");
   Material ceiling_material;
-  ceiling_material.base_color = {0.8f, 0.8f, 0.8f};
+  ceiling_material.base_color = {0.2, 0.6, 1.0};
   int ceiling_id = scene->CreateEntity();
   scene->SetEntityMesh(ceiling_id, ceiling_mesh_id);
   scene->SetEntityMaterial(ceiling_id, ceiling_material);
 
   vertices.clear();
-  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
-  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, 559.2f}, {1.0f, 1.0f}));
   vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
   vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({116.0f, 500.0f, 559.2f}, {0.3f, 0.7f}));
+  vertices.push_back(make_vertex({-116.0f, 500.0f, 559.2f}, {0.7f, 0.7f}));
+  vertices.push_back(make_vertex({-116.0f, 90.0f, 559.2f}, {0.7f, 0.3f}));
+  vertices.push_back(make_vertex({116.0f, 90.0f, 559.2f}, {0.3f, 0.3f}));
+  std::vector<uint32_t> new_indices = {0, 1, 4, 4, 1, 5, 5, 1, 2, 5, 2, 6, 6, 2, 3, 6, 3, 7, 7, 3, 0, 7, 0, 4};
   int back_wall_mesh_id =
-      asset_manager->LoadMesh(Mesh(vertices, indices), "BackWallMesh");
+      asset_manager->LoadMesh(Mesh(vertices, new_indices), "BackWallMesh");
   Material back_wall_material;
-  back_wall_material.base_color = {0.8f, 0.8f, 0.8f};
+  back_wall_material.base_color = {0.2, 0.6, 1.0};
   int back_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(back_wall_id, back_wall_mesh_id);
   scene->SetEntityMaterial(back_wall_id, back_wall_material);
-  scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+  //scene->SetEntityAlbedoTexture(back_wall_id, terrain_texture_id);
+
+  vertices.clear();
+  vertices.push_back(make_vertex({116.0f, 500.0f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-116.0f, 500.0f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-116.0f, 90.0f, 559.2f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({116.0f, 90.0f, 559.2f}, {0.0f, 0.0f}));
+  int window_glass_mesh_id =
+    asset_manager->LoadMesh(Mesh(vertices, indices), "WindowGlassMesh");
+  Material window_glass_material;
+  window_glass_material.type = MATERIAL_TYPE_RETRACTIVE;
+  window_glass_material.base_color = {0.8f, 0.8f, 0.8f};
+  window_glass_material.ior = 1.5;
+  int window_glass_id = scene->CreateEntity();
+  scene->SetEntityMesh(window_glass_id, window_glass_mesh_id);
+  scene->SetEntityMaterial(window_glass_id, window_glass_material);
 
   vertices.clear();
   vertices.push_back(make_vertex({-400.0f, 0.0f, 559.2f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({-400.0f, 0.0f, -400.0f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({-400.0f, 648.8f, -400.0f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({-400.0f, 648.8f, 559.2f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, -400.0f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({-400.0f, 848.8f, 559.2f}, {0.0f, 1.0f}));
   int right_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "RightWallMesh");
   Material right_wall_material;
-  right_wall_material.base_color = {0.8, 0.8, 0.8};
+  right_wall_material.base_color = {0.2, 0.6, 1.0};
   int right_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(right_wall_id, right_wall_mesh_id);
   scene->SetEntityMaterial(right_wall_id, right_wall_material);
@@ -403,26 +611,29 @@ void LoadSunFlowerDog(Scene *scene)
   vertices.clear();
   vertices.push_back(make_vertex({1000.0f, 0.0f, -400.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({1000.0f, 0.0f, 559.2f}, {1.0f, 0.0f}));
-  vertices.push_back(make_vertex({1000.0f, 648.8f, 559.2f}, {1.0f, 1.0f}));
-  vertices.push_back(make_vertex({1000.0f, 648.8f, -400.0f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, 559.2f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({1000.0f, 848.8f, -400.0f}, {0.0f, 1.0f}));
   int left_wall_mesh_id =
       asset_manager->LoadMesh(Mesh(vertices, indices), "LeftWallMesh");
   Material left_wall_material;
-  left_wall_material.base_color = {0.8f, 0.8f, 0.8f};
+  left_wall_material.base_color = {0.2, 0.6, 1.0};
   int left_wall_id = scene->CreateEntity();
   scene->SetEntityMesh(left_wall_id, left_wall_mesh_id);
   scene->SetEntityMaterial(left_wall_id, left_wall_material);
   //(LR, UD, FB)
+
   auto envmap = scene->GetEnvMap();
 
-  Texture envmap_texture;
+  /*Texture envmap_texture;
   envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
                               LDRColorSpace::UNORM);
   auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
   envmap->SetEnvmapTexture(envmap_id);
-  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});
-  scene->Camera()->SetPosition({308.0f, 563.0f, -500.0f});
-  scene->Camera()->SetEulerAngles({glm::radians(-30.0f), glm::radians(180.0f), 0.0f});
+
+  scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});*/
+  scene->SetEnvmapSettings({0.0f, 0.0f, 0, 0});
+  scene->Camera()->SetPosition({208.0f, 593.0f, -800.0f});
+  scene->Camera()->SetEulerAngles({glm::radians(-20.0f), glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
   scene->Camera()->SetFar(2000.0f);
   scene->Camera()->SetCameraSpeed(100.0f);
@@ -687,11 +898,14 @@ void LoadCornellBox(Scene *scene) {
   Material short_box_material;
   short_box_material.type = MATERIAL_TYPE_MULTILAYER;   
   short_box_material.base_color = {0.8f, 0.8f, 0.8f};
-  short_box_material.roughness = 1.0;
+  short_box_material.roughness = 0.1;   
   short_box_material.sheen = 1.0; 
   short_box_material.sheen_tint = 0.5;
   short_box_material.clearcoat = 1.0;
   short_box_material.clearcoat_roughness = 0.5; 
+  short_box_material.metallic = 0; 
+  short_box_material.specular = 0.5;
+  short_box_material.specular_tint = 0.5;
   short_box_material.a = 1.5046;
   short_box_material.b = 4200;
   short_box_material.c = 7650;

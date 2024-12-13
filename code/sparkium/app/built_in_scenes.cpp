@@ -273,7 +273,7 @@ void LoadSunFlowerDog(Scene *scene)
   
   Texture table_texture;
   table_texture.LoadFromFile(
-      FindAssetsFile("texture/Wood_Table_C.jpg"),
+      FindAssetsFile("texture/table.jpg"),
       LDRColorSpace::UNORM);
 
   auto table_texture_id =
@@ -330,6 +330,73 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityAlbedoTexture(chair_id, chair_texture_id);
   scene->SetEntityRoughnessTexture(chair_id, chair_roughness_texture_id);
   scene->SetEntityNormalTexture(chair_id, chair_normal_texture_id);
+
+  Mesh teapot1_mesh;
+	teapot1_mesh.LoadObjFile(FindAssetsFile("mesh/teapot1/Teapot1.obj"));
+	teapot1_mesh.scale(30.0f);
+  //teapot1_mesh.rotate(75.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	teapot1_mesh.translate(glm::vec3(255.0f, 180.0f, 210.0f));
+
+  int teapot1_mesh_id =
+      asset_manager->LoadMesh(teapot1_mesh, "teapot1Mesh"); 
+
+  Material teapot1_material;
+  teapot1_material.base_color = {1.000f, 1.000f, 1.000f};
+	teapot1_material.type=MATERIAL_TYPE_METAL;
+  teapot1_material.roughness = 0.4;
+  
+  Texture teapot1_texture;
+  teapot1_texture.LoadFromFile(
+      FindAssetsFile("texture/teapot1.png"),
+      LDRColorSpace::UNORM);
+
+  auto teapot1_texture_id =
+      asset_manager->LoadTexture(teapot1_texture, "teapot1Texture");
+  int teapot1_id = scene->CreateEntity();
+  scene->SetEntityMesh(teapot1_id, teapot1_mesh_id);
+  scene->SetEntityMaterial(teapot1_id, teapot1_material);
+  scene->SetEntityAlbedoTexture(teapot1_id, teapot1_texture_id);
+
+  Mesh vase_mesh;
+	vase_mesh.LoadObjFile(FindAssetsFile("mesh/vase/vase.obj"));
+	vase_mesh.scale(40.0f);
+  //vase_mesh.rotate(75.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	vase_mesh.translate(glm::vec3(255.0f, 145.0f, 110.0f));
+
+  int vase_mesh_id =
+      asset_manager->LoadMesh(vase_mesh, "vaseMesh"); 
+
+  Material vase_material;
+  vase_material.base_color = {0.6f, 0.6f, 0.6f};
+	vase_material.type=MATERIAL_TYPE_RETRACTIVE;
+  vase_material.ior = 1.5; 
+
+  int vase_id = scene->CreateEntity();
+  scene->SetEntityMesh(vase_id, vase_mesh_id);
+  scene->SetEntityMaterial(vase_id, vase_material);
+
+  Mesh pot_mesh;
+	pot_mesh.LoadObjFile(FindAssetsFile("mesh/pot/pot.obj"));
+	pot_mesh.scale(50.0f);
+  pot_mesh.rotate(115.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	pot_mesh.translate(glm::vec3(315.0f, 145.0f, 140.0f));
+
+  int pot_mesh_id =
+      asset_manager->LoadMesh(pot_mesh, "potMesh"); 
+
+  Material pot_material;
+  pot_material.base_color = {1.000f, 1.000f, 1.000f};
+	pot_material.type=MATERIAL_TYPE_MULTILAYER; 
+  pot_material.roughness = 0.05;
+  pot_material.sheen = 0.3; 
+  pot_material.sheen_tint = 0.5;
+  pot_material.clearcoat = 1.0; 
+  pot_material.clearcoat_roughness = 0.1; 
+  pot_material.specular = 0.8;
+  pot_material.specular_tint = 0.8;
+  int pot_id = scene->CreateEntity();
+  scene->SetEntityMesh(pot_id, pot_mesh_id);
+  scene->SetEntityMaterial(pot_id, pot_material);
 
   Mesh sofa_mesh;
 	sofa_mesh.LoadObjFile(FindAssetsFile("mesh/sofa/Koltuk.obj"));

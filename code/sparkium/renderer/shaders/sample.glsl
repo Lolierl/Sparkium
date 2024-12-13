@@ -177,15 +177,15 @@ SampleDirection SampleSpecularTransportDirection(vec3 in_direction, vec3 normal_
   ret.direction = ReflectionDirection(normal_direction, in_direction);
   return ret;
 }
-SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal, float inside, float wave_length) {
+SampleDirection SampleRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside, float wave_length) {
   SampleDirection ret; 
   ret.pdf = 1;
 
-  vec3 reflection_direction = ReflectionDirection(normal, in_direction); 
+  vec3 reflection_direction = ReflectionDirection(normal_direction, in_direction); 
   float n = material.a + material.b / pow(wave_length, 2.0) + material.c / pow(wave_length, 4.0);
   float etap = (inside < 1e-3) ? n : 1.0 / n;
-  vec3 retraction_direction = RefractionDirection(normal, in_direction, etap); 
-  float ratio = FresnelReflectionRate(in_direction, normal, etap); 
+  vec3 retraction_direction = RefractionDirection(normal_direction, in_direction, etap); 
+  float ratio = FresnelReflectionRate(in_direction, normal_direction, etap); 
   if(RandomFloat() < ratio)
   {
     ret.pdf = ratio;
@@ -326,6 +326,14 @@ SampleDirection SampleMultilayerTransportDirection(Material material, vec3 in_di
     }
   }
 }
+
+SampleDirection SampleColoredRetractiveTransportDirection(Material material, vec3 in_direction, vec3 normal_direction, float inside, float wave_length) {
+  if (RandomFloat() > material.alpha) {
+    return SampleRetractiveTransportDirection(material, in_direction, normal_direction, inside, wave_length);
+  }
+  return SampleLambertianTransportDirection(normal_direction);
+}
+
 // /*LighSource Sample*/
 // SampleDirection SampleDirectLighting(vec3 origin) 
 // {
@@ -380,6 +388,9 @@ SampleDirection SampleTransportDirection(vec3 origin, Material material, vec3 in
   }
   else if (material.type == MATERIAL_TYPE_MULTILAYER) {
     return SampleMultilayerTransportDirection(material, in_direction, normal_direction);
+  }
+  else if (material.type == MATERIAL_TYPE_COLORED_RETRACTIVE) {
+    return SampleColoredRetractiveTransportDirection(material, in_direction, normal_direction, inside, wave_length);
   }
 }
 

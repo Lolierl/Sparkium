@@ -136,6 +136,54 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(bed_id, bed_material);
   scene->SetEntityAlbedoTexture(bed_id, bed_texture_id);
 
+Mesh pillow_mesh;
+	pillow_mesh.LoadObjFile(FindAssetsFile("mesh/pillow/pillow.obj"));
+	pillow_mesh.scale(80.0f);  
+  //pillow_mesh.rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  //pillow_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	pillow_mesh.translate(glm::vec3(-150.0f, 105.0f, 290.0f));
+  int pillow_mesh_id =
+      asset_manager->LoadMesh(pillow_mesh, "pillowMesh"); 
+
+  Material pillow_material;
+  pillow_material.base_color = {1.000f, 1.000f, 1.000f};
+	pillow_material.type=MATERIAL_TYPE_MULTILAYER;
+  pillow_material.roughness = 0.6;
+  pillow_material.specular = 0.2;
+  pillow_material.specular_tint = 0.5;
+  
+  Texture pillow_texture;
+  pillow_texture.LoadFromFile(
+      FindAssetsFile("texture/pillow.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto pillow_texture_id =
+      asset_manager->LoadTexture(pillow_texture, "pillowTexture");
+  int pillow_id = scene->CreateEntity();
+  scene->SetEntityMesh(pillow_id, pillow_mesh_id);
+  scene->SetEntityMaterial(pillow_id, pillow_material);
+  scene->SetEntityAlbedoTexture(pillow_id, pillow_texture_id);
+
+  Mesh pillow2_mesh;
+	pillow2_mesh.LoadObjFile(FindAssetsFile("mesh/pillow/pillow.obj"));
+	pillow2_mesh.scale(80.0f);  
+  pillow2_mesh.rotate(20.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //pillow2_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	pillow2_mesh.translate(glm::vec3(-290.0f, 105.0f, 280.0f));
+  int pillow2_mesh_id =
+      asset_manager->LoadMesh(pillow2_mesh, "pillow2Mesh"); 
+
+  Material pillow2_material;
+  pillow2_material.base_color = {1.000f, 1.000f, 1.000f};
+	pillow2_material.type=MATERIAL_TYPE_MULTILAYER;
+  pillow2_material.roughness = 0.6;
+  pillow2_material.specular = 0.2;
+  pillow2_material.specular_tint = 0.5;
+  
+  int pillow2_id = scene->CreateEntity();
+  scene->SetEntityMesh(pillow2_id, pillow2_mesh_id);
+  scene->SetEntityMaterial(pillow2_id, pillow2_material);
+  scene->SetEntityAlbedoTexture(pillow2_id, pillow_texture_id);
 
   Mesh mattress_mesh;
 	mattress_mesh.LoadObjFile(FindAssetsFile("mesh/bed/bed2.obj"));
@@ -147,7 +195,7 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadMesh(mattress_mesh, "BedMesh"); 
 
   Material mattress_material;
-	mattress_material.type=MATERIAL_TYPE_MULTILAYER; 
+	mattress_material.type=MATERIAL_TYPE_LAMBERTIAN; 
   mattress_material.roughness = 0.8;
   mattress_material.sheen = 0.3; 
   mattress_material.sheen_tint = 0.5;
@@ -156,7 +204,7 @@ void LoadSunFlowerDog(Scene *scene)
   
   Texture mattress_texture;
   mattress_texture.LoadFromFile(
-      FindAssetsFile("texture/dragon.jpg"),
+      FindAssetsFile("texture/bed/mattress.png"),
       LDRColorSpace::UNORM);
 
   auto mattress_texture_id =
@@ -278,6 +326,91 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMaterial(frame4_id, frame4_material);
   scene->SetEntityAlbedoTexture(frame4_id, frame4_texture_id);
 
+  Mesh frame5_mesh;
+	frame5_mesh.LoadObjFile(FindAssetsFile("mesh/frame/frame.obj"));
+	frame5_mesh.scale(70.0f);  
+  frame5_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //frame5_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	frame5_mesh.translate(glm::vec3(-250.0f, 400.0f, 550.0f));
+  int frame5_mesh_id =
+      asset_manager->LoadMesh(frame5_mesh, "frame5Mesh"); 
+
+  Material frame5_material;
+  frame5_material.base_color = {1.000f, 1.000f, 1.000f};
+	frame5_material.type=MATERIAL_TYPE_MULTILAYER;
+  frame5_material.roughness = 0.4;
+  frame5_material.specular = 0.2;
+  frame5_material.specular_tint = 0.5;
+  
+  Texture frame5_texture;
+  frame5_texture.LoadFromFile(
+      FindAssetsFile("texture/floor.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto frame5_texture_id =
+      asset_manager->LoadTexture(frame5_texture, "frame5Texture");
+  int frame5_id = scene->CreateEntity();
+  scene->SetEntityMesh(frame5_id, frame5_mesh_id);
+  scene->SetEntityMaterial(frame5_id, frame5_material);
+  scene->SetEntityAlbedoTexture(frame5_id, frame5_texture_id);
+
+  Mesh mirror_frame_mesh;
+	mirror_frame_mesh.LoadObjFile(FindAssetsFile("mesh/mirror/mirror_frame.obj"));
+	mirror_frame_mesh.scale(120.0f);  
+  //mirror_frame_mesh.rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  //mirror_frame_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	mirror_frame_mesh.translate(glm::vec3(370.0f, 305.0f, 550.0f));
+  int mirror_frame_mesh_id =
+      asset_manager->LoadMesh(mirror_frame_mesh, "mirror_frameMesh"); 
+
+  Material mirror_frame_material;
+  mirror_frame_material.base_color = {0.5, 0.25, 0.1};
+	mirror_frame_material.type=MATERIAL_TYPE_MULTILAYER;
+  mirror_frame_material.roughness = 0.6;
+  mirror_frame_material.specular = 0.2;
+  mirror_frame_material.specular_tint = 0.5;
+  mirror_frame_material.sheen = 1.0;
+  mirror_frame_material.sheen_tint = 0.5; 
+  mirror_frame_material.clearcoat = 0.7; 
+  mirror_frame_material.clearcoat_roughness = 0.1;
+
+  Texture mirror_frame_texture;
+  mirror_frame_texture.LoadFromFile(
+      FindAssetsFile("texture/mirror/mirror_frame.png"),
+      LDRColorSpace::UNORM);
+
+  auto mirror_frame_texture_id =
+    asset_manager->LoadTexture(mirror_frame_texture, "mirror_frameTexture");
+  int mirror_frame_id = scene->CreateEntity();
+  scene->SetEntityMesh(mirror_frame_id, mirror_frame_mesh_id);
+  scene->SetEntityMaterial(mirror_frame_id, mirror_frame_material);
+  scene->SetEntityAlbedoTexture(mirror_frame_id, mirror_frame_texture_id);
+
+  Mesh mirror_mesh;
+	mirror_mesh.LoadObjFile(FindAssetsFile("mesh/mirror/mirror.obj"));
+	mirror_mesh.scale(120.0f);  
+  mirror_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+  //mirror_mesh.rotate(180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	mirror_mesh.translate(glm::vec3(370.0f, 305.0f, 550.0f));
+  int mirror_mesh_id =
+      asset_manager->LoadMesh(mirror_mesh, "mirrorMesh"); 
+
+  Material mirror_material;
+  mirror_material.base_color = {1.000f, 1.000f, 1.000f};
+	mirror_material.type=MATERIAL_TYPE_SPECULAR;
+  
+  Texture mirror_texture;
+  mirror_texture.LoadFromFile(
+      FindAssetsFile("texture/mirror/mirror.jpg"),
+      LDRColorSpace::UNORM);
+
+  auto mirror_texture_id =
+      asset_manager->LoadTexture(mirror_texture, "mirrorTexture");
+  int mirror_id = scene->CreateEntity();
+  scene->SetEntityMesh(mirror_id, mirror_mesh_id);
+  scene->SetEntityMaterial(mirror_id, mirror_material);
+  scene->SetEntityAlbedoTexture(mirror_id, mirror_texture_id);
+
   Mesh table_mesh;
 	table_mesh.LoadObjFile(FindAssetsFile("mesh/Table/Wood_Table.obj"));
 
@@ -391,7 +524,7 @@ void LoadSunFlowerDog(Scene *scene)
       asset_manager->LoadMesh(vase_mesh, "vaseMesh"); 
 
   Material vase_material;
-  vase_material.base_color = {0.6f, 0.6f, 0.6f};
+  vase_material.base_color = {1.0f, 0.5f, 0.3f};
 	vase_material.type=MATERIAL_TYPE_RETRACTIVE;
   vase_material.ior = 1.5; 
 

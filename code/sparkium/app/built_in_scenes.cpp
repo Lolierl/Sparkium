@@ -89,11 +89,6 @@ void LoadSunFlowerDog(Scene *scene)
   int light2_id = scene->CreateEntity();
   scene->SetEntityMesh(light2_id, light2_mesh_id);
   scene->SetEntityMaterial(light2_id, light2_material);
-/*
-  Mesh plate_mesh;
-	plate_mesh.LoadObjFile(FindAssetsFile("mesh/Plate/Plate OBJ.obj"));
-	plate_mesh.scale(50.0f);
-	plate_mesh.translate(glm::vec3(210.0f, 190.0f, 100.0f));
 
   int plate_mesh_id =
       asset_manager->LoadMesh(plate_mesh, "PlateMesh"); 
@@ -135,7 +130,6 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(hat_id, hat_mesh_id);
   scene->SetEntityMaterial(hat_id, hat_material);
   scene->SetEntityAlbedoTexture(hat_id, hat_texture_id);
-
   Mesh bed_mesh;
 	bed_mesh.LoadObjFile(FindAssetsFile("mesh/bed/bed.obj"));
 	bed_mesh.scale(220.0f);  
@@ -438,6 +432,75 @@ void LoadSunFlowerDog(Scene *scene)
   scene->SetEntityMesh(mirror_id, mirror_mesh_id);
   scene->SetEntityMaterial(mirror_id, mirror_material);
   scene->SetEntityAlbedoTexture(mirror_id, mirror_texture_id);
+
+  Mesh lattern_frame_mesh;
+	lattern_frame_mesh.LoadObjFile(FindAssetsFile("mesh/lattern/lattern_frame.obj"));
+  lattern_frame_mesh.rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  lattern_frame_mesh.scale(150.0f);  
+  lattern_frame_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	lattern_frame_mesh.translate(glm::vec3(-300.0f, 400.0f, 150.0f));
+  int lattern_frame_mesh_id =
+      asset_manager->LoadMesh(lattern_frame_mesh, "lattern_frameMesh"); 
+
+  Material lattern_frame_material;
+  lattern_frame_material.base_color = {1.000f, 1.000f, 1.000f};
+	lattern_frame_material.type=MATERIAL_TYPE_METAL;
+  lattern_frame_material.roughness = 0.4;
+
+  Texture lattern_frame_texture;
+  lattern_frame_texture.LoadFromFile(
+      FindAssetsFile("texture/lamp.png"),
+      LDRColorSpace::UNORM);
+
+  auto lattern_frame_texture_id =
+      asset_manager->LoadTexture(lattern_frame_texture, "lattern_frameTexture");
+  int lattern_frame_id = scene->CreateEntity();
+  scene->SetEntityMesh(lattern_frame_id, lattern_frame_mesh_id);
+  scene->SetEntityMaterial(lattern_frame_id, lattern_frame_material);
+  scene->SetEntityAlbedoTexture(lattern_frame_id, lattern_frame_texture_id);
+
+  Mesh lattern_glass_mesh;
+	lattern_glass_mesh.LoadObjFile(FindAssetsFile("mesh/lattern/lattern_glass.obj"));
+  lattern_glass_mesh.rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  lattern_glass_mesh.scale(140.0f);  
+  lattern_glass_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	lattern_glass_mesh.translate(glm::vec3(-300.0f, 400.0f, 150.0f));
+  int lattern_glass_mesh_id =
+      asset_manager->LoadMesh(lattern_glass_mesh, "lattern_glassMesh"); 
+
+  Material lattern_glass_material;
+  lattern_glass_material.base_color = {1.000f, 1.000f, 1.000f};
+	lattern_glass_material.type=MATERIAL_TYPE_RETRACTIVE;
+  lattern_glass_material.ior = 1.5; 
+  
+  int lattern_glass_id = scene->CreateEntity();
+  scene->SetEntityMesh(lattern_glass_id, lattern_glass_mesh_id);
+  scene->SetEntityMaterial(lattern_glass_id, lattern_glass_material);
+
+  Mesh lattern_lamp_mesh;
+	lattern_lamp_mesh.LoadObjFile(FindAssetsFile("mesh/lattern/lamp.obj"));
+  lattern_lamp_mesh.rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  lattern_lamp_mesh.scale(150.0f);  
+  lattern_lamp_mesh.rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	lattern_lamp_mesh.translate(glm::vec3(-300.0f, 400.0f, 150.0f));
+  int lattern_lamp_mesh_id =
+      asset_manager->LoadMesh(lattern_lamp_mesh, "lattern_lampMesh"); 
+
+  Material lattern_lamp_material;
+  lattern_lamp_material.base_color = {1.000f, 1.000f, 1.000f};
+	lattern_lamp_material.type=MATERIAL_TYPE_VOLUME; 
+  lattern_lamp_material.a = 1.5046;
+  lattern_lamp_material.b = 4200;
+  lattern_lamp_material.c = 7650;
+  lattern_lamp_material.g = 0.9;
+  lattern_lamp_material.sigma_a = 3e-3 * 0.7;
+  lattern_lamp_material.sigma_s = 3e-3 * 0.3;
+  lattern_lamp_material.spectrum_type = SPECTRUM_TYPE_SODIUM;
+  lattern_lamp_material.emission_strength = 1000.0f;
+  
+  int lattern_lamp_id = scene->CreateEntity();
+  scene->SetEntityMesh(lattern_lamp_id, lattern_lamp_mesh_id);
+  scene->SetEntityMaterial(lattern_lamp_id, lattern_lamp_material);
 
   Mesh table_mesh;
 	table_mesh.LoadObjFile(FindAssetsFile("mesh/Table/Wood_Table.obj"));

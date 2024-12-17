@@ -821,7 +821,7 @@ void LoadSunFlowerDog(Scene *scene)
   window_glass_material.type = MATERIAL_TYPE_VOLUME;
   window_glass_material.base_color = {0.8f, 0.8f, 0.8f};
   window_glass_material.ior = 1.5;
-  window_glass_material.sigma_s = 1e-1;
+  window_glass_material.sigma_s = 7e-2;
   window_glass_material.g = 0.9;
   int window_glass_id = scene->CreateEntity();
   scene->SetEntityMesh(window_glass_id, window_glass_mesh_id);
@@ -933,7 +933,7 @@ void LoadSunFlowerDog(Scene *scene)
   auto envmap = scene->GetEnvMap();
 
   Texture envmap_texture;
-  envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
+  envmap_texture.LoadFromFile(FindAssetsFile("texture/sky.hdr"),
                               LDRColorSpace::UNORM);
   auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
   envmap->SetEnvmapTexture(envmap_id);

@@ -976,12 +976,12 @@ void LoadCornellBox(Scene *scene) {
 	// Create a sphere
 	Mesh sphere_mesh;
 	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
-	sphere_mesh.CreateSphere(sphere_position, 100.0f, 16, 16);
+	sphere_mesh.CreateSphere(sphere_position, 100.0f, 256, 256);
 	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
 
 	Material sphere_material;
-	sphere_material.base_color = {1.000, 0.766, 0.336};
-	sphere_material.type = MATERIAL_TYPE_VOLUME;
+	sphere_material.base_color = {1.000, 1.000, 1.000};
+	sphere_material.type = MATERIAL_TYPE_RETRACTIVE;
   sphere_material.roughness = 0.4; 
   sphere_material.anisotropic = 0;
   sphere_material.anisotropic_rotation = 0;
@@ -990,8 +990,8 @@ void LoadCornellBox(Scene *scene) {
   sphere_material.c = 7650;
   sphere_material.sigma_a = 3e-3 * 0.2;
   sphere_material.sigma_s = 3e-3 * 0.8;
-  sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
-  sphere_material.emission_strength = 1.0f;
+  // sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
+  // sphere_material.emission_strength = 1.0f;
 	int sphere_id = scene->CreateEntity();
 	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
 	scene->SetEntityMaterial(sphere_id, sphere_material);
@@ -1030,7 +1030,8 @@ void LoadCornellBox(Scene *scene) {
   light_material.emission = {1.0f, 1.0f, 1.0f};
   light_material.emission_strength = 30.0f;
   light_material.spectrum_type = SPECTRUM_TYPE_D75;
-  light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
+  light_material.illuminant_type = ILLUMINANT_TYPE_PARALLEL;
+  light_material.illuminant_dir = {0.0f, -1.0f, 0.0f};
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);

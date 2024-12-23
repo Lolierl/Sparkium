@@ -67,6 +67,12 @@ float CalculateLightStrength(Material material, vec3 origin, vec3 direction, vec
 	else if (material.type == MATERIAL_TYPE_VOLUME) {
 		geometry_coeff = 1.0;
 	}
+	else if (material.illuminant_type == ILLUMINANT_TYPE_PARALLEL) {
+		if (max(abs(dot(material.illuminant_dir, direction)), 0.0) < 1 - 1e-1) {
+			return 0.0;
+		}
+		geometry_coeff = 1.0;
+    }
 	return geometry_coeff * spectrum_coeff * material.emission_strength;
 }
 

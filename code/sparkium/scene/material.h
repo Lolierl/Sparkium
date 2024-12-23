@@ -20,6 +20,7 @@ constexpr uint32_t SPECTRUM_TYPE_D50 = 102;
 constexpr uint32_t SPECTRUM_TYPE_SODIUM = 103;
 
 constexpr uint32_t ILLUMINANT_TYPE_LAMBERTIAN = 200;
+constexpr uint32_t ILLUMINANT_TYPE_PARALLEL = 201;
 
 // clang-format off
 struct Material {

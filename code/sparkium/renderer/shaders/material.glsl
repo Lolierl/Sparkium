@@ -17,6 +17,7 @@
 #define SPECTRUM_TYPE_SODIUM 103
 
 #define ILLUMINANT_TYPE_LAMBERTIAN 200
+#define ILLUMINANT_TYPE_PARALLEL 201
 
 struct Material {
   vec3 base_color;

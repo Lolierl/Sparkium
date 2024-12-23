@@ -18,7 +18,8 @@ struct SceneSettings {
   float total_emission_energy{0.0f};
   uint32_t num_entity{0};
   uint32_t enable_direct_lighting{1};
-  float padding[6];
+  glm::vec3 camera_speed{0.0f};
+  float padding[3];
 };  // need align to 64(0x40) byte
 
 }  // namespace sparkium

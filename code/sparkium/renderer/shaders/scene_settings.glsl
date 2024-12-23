@@ -16,6 +16,7 @@ struct SceneSettings {
   float total_emission_energy;
   uint num_entity;
   bool enable_direct_lighting;
+  vec3 camera_speed;
 };
 
 #endif

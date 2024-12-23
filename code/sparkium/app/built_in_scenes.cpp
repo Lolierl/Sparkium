@@ -821,7 +821,7 @@ void LoadSunFlowerDog(Scene *scene)
   window_glass_material.type = MATERIAL_TYPE_VOLUME;
   window_glass_material.base_color = {0.8f, 0.8f, 0.8f};
   window_glass_material.ior = 1.5;
-  window_glass_material.sigma_s = 7e-2;
+  window_glass_material.sigma_s = 1e-1;
   window_glass_material.g = 0.9;
   int window_glass_id = scene->CreateEntity();
   scene->SetEntityMesh(window_glass_id, window_glass_mesh_id);
@@ -933,17 +933,17 @@ void LoadSunFlowerDog(Scene *scene)
   auto envmap = scene->GetEnvMap();
 
   Texture envmap_texture;
-  envmap_texture.LoadFromFile(FindAssetsFile("texture/sky.hdr"),
+  envmap_texture.LoadFromFile(FindAssetsFile("texture/envmap_clouds_4k.hdr"),
                               LDRColorSpace::UNORM);
   auto envmap_id = asset_manager->LoadTexture(envmap_texture, "Envmap");
   envmap->SetEnvmapTexture(envmap_id);
-
+  
   scene->SetEnvmapSettings({0.0f, 1.0f, uint32_t(envmap_id), 0});
   scene->Camera()->SetPosition({108.0f, 343.0f, -600.0f});
   scene->Camera()->SetEulerAngles({glm::radians(-10.0f), glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
   scene->Camera()->SetFar(2000.0f);
-  scene->Camera()->SetCameraSpeed(100.0f);
+  scene->Camera()->SetCameraSpeed(glm::vec3(0.0f));
 }
 
 void LoadCornellBox(Scene *scene) {
@@ -1319,7 +1319,7 @@ void LoadCornellBox(Scene *scene) {
   scene->Camera()->SetEulerAngles({0.0f, glm::radians(180.0f), 0.0f});
   scene->Camera()->SetFov(glm::radians(40.0f));
   scene->Camera()->SetFar(2000.0f);
-  scene->Camera()->SetCameraSpeed(100.0f);
+  scene->Camera()->SetCameraSpeed(glm::vec3(100.0f));
 }
 
 void LoadIslandScene(Scene *scene) {

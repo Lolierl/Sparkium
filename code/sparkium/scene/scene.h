@@ -119,6 +119,13 @@ class Scene {
 
   void GetSceneSettings(SceneSettings &settings) const;
 
+  void SetCameraSpeed(const glm::vec3 &speed) {
+    scene_settings_.camera_speed = speed;
+  }
+
+  glm::vec3 GetCameraSpeed() const {
+    return scene_settings_.camera_speed;
+  }
  private:
   void UpdateDynamicBuffers();
 

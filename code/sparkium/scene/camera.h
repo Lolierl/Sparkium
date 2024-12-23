@@ -57,11 +57,11 @@ class Camera {
     far_ = farf;
   }
 
-  float GetCameraSpeed() const {
+  glm::vec3 GetCameraSpeed() const {
     return speed_;
   }
 
-  void SetCameraSpeed(float speed) {
+  void SetCameraSpeed(glm::vec3 speed) {
     speed_ = speed;
   }
 
@@ -71,6 +71,6 @@ class Camera {
   float fov_{glm::radians(45.0f)};
   float near_{0.1f};
   float far_{1000.0f};
-  float speed_{0.1f};
+  glm::vec3 speed_{glm::vec3(0.1f)};
 };
 }  // namespace sparkium

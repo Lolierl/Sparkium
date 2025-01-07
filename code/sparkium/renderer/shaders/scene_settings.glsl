@@ -1,6 +1,7 @@
 #ifndef SCENE_SETTINGS_H
 #define SCENE_SETTINGS_H
 
+#define camera_speed vec3(1)
 struct SceneSettings {
   mat4 projection;
   mat4 inv_projection;

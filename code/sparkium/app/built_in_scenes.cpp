@@ -974,7 +974,7 @@ void LoadCornellBox(Scene *scene) {
   // scene->SetEntityMaterial(light_sphere_id, light_sphere_material);
 
 	// Create a sphere
-	Mesh sphere_mesh;
+	/*Mesh sphere_mesh;
 	glm::vec3 sphere_position = glm::vec3(203.0f, 268.7f, 187.0f);  // Position of the sphere
 	sphere_mesh.CreateSphere(sphere_position, 100.0f, 256, 256);
 	int sphere_mesh_id = asset_manager->LoadMesh(sphere_mesh, "SphereMesh");
@@ -989,12 +989,37 @@ void LoadCornellBox(Scene *scene) {
   sphere_material.b = 4200;
   sphere_material.c = 7650;
   sphere_material.sigma_a = 3e-3 * 0.2;
-  sphere_material.sigma_s = 3e-3 * 0.8;
+  sphere_material.sigma_s = 3e-3 * 0.8;	
+  int sphere_id = scene->CreateEntity();
+	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
+	scene->SetEntityMaterial(sphere_id, sphere_material);*/
   // sphere_material.spectrum_type = SPECTRUM_TYPE_D50;
   // sphere_material.emission_strength = 1.0f;
-	int sphere_id = scene->CreateEntity();
-	scene->SetEntityMesh(sphere_id, sphere_mesh_id);
-	scene->SetEntityMaterial(sphere_id, sphere_material);
+  std::vector<Vertex> vertices;
+  std::vector<uint32_t> indices = {0, 1, 3, 1, 2, 3};
+
+  vertices.clear();
+  vertices.push_back(make_vertex({203.0f, 427.0f, 268.7f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({203.0f, 427.0f, 468.7f}, {1.0f, 0.0f}));
+  vertices.push_back(make_vertex({363.0f, 427.0f, 468.7f}, {1.0f, 1.0f}));
+  vertices.push_back(make_vertex({363.0f, 427.0f, 268.7f}, {0.0f, 1.0f}));
+  vertices.push_back(make_vertex({203.0f, 427.0f + 86.6f, 318.7f}, {0.0f, 0.0f}));
+  vertices.push_back(make_vertex({363.0f, 427.0f + 86.6f, 318.7f}, {0.0f, 0.0f}));
+  std::vector<uint32_t> new_indices = {0, 1, 4, 0, 1, 3, 1, 2, 3, 2, 5, 3, 4, 0, 3, 4, 3, 5, 5, 2, 4, 2, 4, 1};
+  int prism_mesh_id =
+      asset_manager->LoadMesh(Mesh(vertices, new_indices), "PrismMesh");
+  Material prism_material;
+  prism_material.type = MATERIAL_TYPE_RETRACTIVE; 
+  prism_material.ior = 1.5; 
+  prism_material.base_color = {0.8, 0.8, 0.8};
+  prism_material.a = 1.5046;
+  prism_material.b = 42000;
+  prism_material.c = 1065000;
+  prism_material.sigma_a = 3e-3 * 0.2;
+  prism_material.sigma_s = 3e-3 * 0.8;	
+  int prism_id = scene->CreateEntity();
+  scene->SetEntityMesh(prism_id, prism_mesh_id);
+  scene->SetEntityMaterial(prism_id, prism_material);
 
 	Mesh bunny_mesh;
 	bunny_mesh.LoadObjFile(FindAssetsFile("mesh/bunny.obj"));
@@ -1014,14 +1039,13 @@ void LoadCornellBox(Scene *scene) {
   scene->SetEntityMesh(bunny_id, bunny_mesh_id);
   scene->SetEntityMaterial(bunny_id, bunny_material);
 
-  std::vector<Vertex> vertices;
-  std::vector<uint32_t> indices = {0, 1, 3, 1, 2, 3};
 
   // light
   // <vertex position="343.0 548.7 227.0" tex_coord="0 0"/>
   // <vertex position="343.0 548.7 332.0" tex_coord="1 0"/>
   // <vertex position="213.0 548.7 332.0" tex_coord="1 1"/>
   // <vertex position="213.0 548.7 227.0" tex_coord="0 1"/>
+  vertices.clear();
   vertices.push_back(make_vertex({343.0f, 548.7f, 227.0f}, {0.0f, 0.0f}));
   vertices.push_back(make_vertex({343.0f, 548.7f, 332.0f}, {1.0f, 0.0f}));
   vertices.push_back(make_vertex({213.0f, 548.7f, 332.0f}, {1.0f, 1.0f}));
@@ -1031,10 +1055,12 @@ void LoadCornellBox(Scene *scene) {
   Material light_material;
   light_material.base_color = {0.0f, 0.0f, 0.0f};
   light_material.emission = {1.0f, 1.0f, 1.0f};
-  light_material.emission_strength = 30.0f;
+  light_material.emission_strength = 100.0f;
   light_material.spectrum_type = SPECTRUM_TYPE_D75;
+
   light_material.illuminant_type = ILLUMINANT_TYPE_LAMBERTIAN;
   light_material.illuminant_dir = {0.0f, -1.0f, 0.0f};
+
   int light_id = scene->CreateEntity();
   scene->SetEntityMesh(light_id, light_mesh_id);
   scene->SetEntityMaterial(light_id, light_material);

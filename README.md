@@ -1,9 +1,11 @@
 ### Acknowledgement
 This project uses framework from the sparkium renderer by @LazyJazz. 
 
-### Demo creation process
-demo/demo.png is the demo submitted in the midterm report. However due to algorithm optimization and changes of the scene, it cannot be exactly reproduced. 
-We have submitted another demo, demo/demo2.png, which is our latest result shown in the oral report. It can be reproduced following commands below, turning persistence to 1.00 and wait until about 3000 samples are accumulated. 
+### Main Result
+
+![Result](./demo/teaser.png)
+
+In this project, our team built up a scene from scratch. It portrays a serene bedroom at sunrise, inspired by Van Gogh’s famous painting. We implemented a powerful renderer with many features, including customized BSDF, texture mapping, skybox, chromatic dispersion, volumetric rendering etc. These features are specially adjusted to make our work more vivid and painterly.
 
 # Sparkium Renderer (星火渲染器-开源版)
 
